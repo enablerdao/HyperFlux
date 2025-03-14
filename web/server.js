@@ -324,7 +324,6 @@ function handleRequest(req, res) {
       res.end(content);
     }
   });
-});
 
 // サーバーを作成
 const server = http.createServer(handleRequest);
