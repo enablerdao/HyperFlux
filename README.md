@@ -14,20 +14,47 @@
 ## 🌊 ビジョン
 「トランザクションが川の流れのように速く、スムーズに動くブロックチェーン。」
 
+<div align="center">
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/diagrams/pof_consensus_C.svg" alt="HyperFlux.io コンセンサスメカニズム" width="80%"/>
+</div>
+
 ## 📋 概要
 HyperFlux.ioは高速処理、スケーラビリティ、セキュリティを兼ね備えた次世代ブロックチェーンプラットフォームです。
 初期フェーズでは50,000 TPS（1秒あたりのトランザクション数）を目標とし、フェーズ2では100,000 TPSを目指します。
 
+<div align="center">
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/diagrams/system_architecture_A.svg" alt="HyperFlux.io システムアーキテクチャ" width="80%"/>
+</div>
+
 ## ✨ 特徴
 - **⚡ Proof of Flow (PoF)**: DAG、PoH、PoSを組み合わせた革新的なコンセンサスアルゴリズム
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/diagrams/pof_consensus_E.svg" alt="HyperFlux.io PoF比較" width="80%"/>
+</div>
+
 - **🔄 動的シャーディング**: トラフィックに応じて自動的にシャード数を調整
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/diagrams/dynamic_sharding_A.svg" alt="HyperFlux.io 動的シャーディング" width="80%"/>
+</div>
+
 - **🧠 AI駆動型トランザクション管理**: 優先順位付けと予測によるスマートな処理
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/diagrams/ai_transaction_A.svg" alt="HyperFlux.io AI駆動型トランザクション管理" width="80%"/>
+</div>
+
 - **🔒 高度なセキュリティ**: AES-256暗号化とマルチシグネチャによる堅牢な保護
 
 ## 技術アーキテクチャ
 
 ### 1. コンセンサスメカニズム: Proof of Flow (PoF)
 PoFは以下の3つの技術を組み合わせた革新的なコンセンサスメカニズムです：
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/diagrams/pof_consensus_D.svg" alt="HyperFlux.io PoFフロー" width="80%"/>
+</div>
 
 1. **有向非巡回グラフ (DAG)**
    - ブロックチェーンの代わりにDAG構造を採用
@@ -47,6 +74,10 @@ PoFは以下の3つの技術を組み合わせた革新的なコンセンサス�
 ### 2. スケーラビリティ: 動的シャーディング
 トラフィック量に応じて自動的にシャード数を調整する仕組みを実装：
 
+<div align="center">
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/diagrams/dynamic_sharding_C.svg" alt="HyperFlux.io シャード再分割" width="80%"/>
+</div>
+
 1. **シャード割り当て**
    - トランザクションIDのハッシュ値に基づいてシャードを決定
    - 実装: `src/sharding.rs`の`ShardingManager::assign_shard`メソッド
@@ -61,6 +92,10 @@ PoFは以下の3つの技術を組み合わせた革新的なコンセンサス�
 
 ### 3. AI駆動型トランザクション管理
 AIを活用してトランザクションの優先順位付けと予測を行います：
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/diagrams/ai_transaction_B.svg" alt="HyperFlux.io AIモデルアーキテクチャ" width="80%"/>
+</div>
 
 1. **優先順位付け**
    - トランザクションの特性（サイズ、親数、タイムスタンプなど）に基づいて優先度を計算
@@ -91,6 +126,10 @@ AIを活用してトランザクションの優先順位付けと予測を行い
    - 実装: `web/index.html`と`web/server.js`
 
 ## 🚀 クイックスタート
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/diagrams/user_flow_A.svg" alt="HyperFlux.io ユーザーフロー" width="80%"/>
+</div>
 
 ### 🌐 ワンクリックデプロイ
 
@@ -154,6 +193,10 @@ cd HyperFlux
 ### 💻 コマンドラインインターフェース (CLI)
 
 HyperFlux.ioはコマンドラインからの操作も可能です：
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/diagrams/user_flow_D.svg" alt="HyperFlux.io 開発フロー" width="80%"/>
+</div>
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/cli.png" alt="HyperFlux.io CLI" width="80%"/>
@@ -465,6 +508,10 @@ Webインターフェースでは、以下の3つのデータソースを切り�
 
 ### 主要コンポーネントの実装詳細
 
+<div align="center">
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/diagrams/system_architecture_B.svg" alt="HyperFlux.io コンポーネント間の相互作用" width="80%"/>
+</div>
+
 #### 1. トランザクション処理
 トランザクション処理の流れは以下の通りです：
 
@@ -626,6 +673,10 @@ Webインターフェースは以下の方法でデプロイできます：
    - シャード数を増やす: 設定ファイルで`initial_shards`を調整
 
 ## コントリビューションガイド
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/diagrams/user_flow_E.svg" alt="HyperFlux.io エコシステム" width="80%"/>
+</div>
 
 1. このリポジトリをフォーク
 2. 機能ブランチを作成: `git checkout -b feature/amazing-feature`
