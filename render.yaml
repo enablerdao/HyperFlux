@@ -1,0 +1,32 @@
+services:
+  # HyperFlux ノードサービス
+  - type: web
+    name: hyperflux-node
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /info
+    envVars:
+      - key: RUST_LOG
+        value: info
+    autoDeploy: true
+
+  # HyperFlux Webインターフェース
+  - type: web
+    name: hyperflux-web
+    env: node
+    buildCommand: cd web && npm install
+    startCommand: cd web && node server.js
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: NODE_URL
+        fromService:
+          name: hyperflux-node
+          type: web
+          property: host
+    autoDeploy: true

@@ -81,6 +81,11 @@ AIを活用してトランザクションの優先順位付けと予測を行い
 
 ## クイックスタート
 
+### ワンクリックデプロイ
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/enablerdao/HyperFlux)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/enablerdao/HyperFlux)
+
 ### 1コマンドでの起動（すべてのOS対応）
 
 以下の1コマンドで、HyperFlux.ioのノードとWebインターフェースを起動できます：
