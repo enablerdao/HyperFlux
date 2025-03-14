@@ -131,6 +131,11 @@ AIを活用してトランザクションの優先順位付けと予測を行い
   <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/user_flow_A.png" alt="HyperFlux.io ユーザーフロー" width="80%"/>
 </div>
 
+> **注意**: Dockerビルドに問題がある場合は、以下の手順を試してください：
+> 1. Dockerfileが最新のものであることを確認
+> 2. `docker build --no-cache -t hyperflux:latest .` コマンドを使用して、キャッシュを使わずにビルド
+> 3. それでも問題が解決しない場合は、`docker system prune -a` を実行してDockerシステムをクリーンアップしてから再試行
+
 ### 🌐 ワンクリックデプロイ
 
 <div align="center">
