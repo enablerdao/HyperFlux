@@ -1,11 +1,26 @@
 #!/bin/bash
 
+# インタラクティブモードの確認
+if [ -t 0 ]; then
+    INTERACTIVE=true
+else
+    INTERACTIVE=false
+fi
+
 # 色の定義
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-YELLOW='\033[1;33m'
-RED='\033[0;31m'
-NC='\033[0m' # No Color
+if [ "$INTERACTIVE" = true ]; then
+    GREEN='\033[0;32m'
+    BLUE='\033[0;34m'
+    YELLOW='\033[1;33m'
+    RED='\033[0;31m'
+    NC='\033[0m' # No Color
+else
+    GREEN=''
+    BLUE=''
+    YELLOW=''
+    RED=''
+    NC=''
+fi
 
 # ロゴを表示
 echo -e "${BLUE}"
@@ -155,19 +170,26 @@ else
 fi
 
 # 起動方法の選択
-echo -e "${YELLOW}HyperFlux.ioの起動方法を選択してください:${NC}"
-echo -e "1) ${GREEN}開発モード${NC} - フォアグラウンドで実行（ログを表示）"
-echo -e "2) ${GREEN}バックグラウンドモード${NC} - バックグラウンドで実行"
-echo -e "3) ${GREEN}本番モード${NC} - 本番設定でバックグラウンドで実行"
-echo -e "4) ${GREEN}終了${NC}"
-read -r choice
+if [ "$INTERACTIVE" = true ]; then
+    echo -e "${YELLOW}HyperFlux.ioの起動方法を選択してください:${NC}"
+    echo -e "1) ${GREEN}開発モード${NC} - フォアグラウンドで実行（ログを表示）"
+    echo -e "2) ${GREEN}バックグラウンドモード${NC} - バックグラウンドで実行"
+    echo -e "3) ${GREEN}本番モード${NC} - 本番設定でバックグラウンドで実行"
+    echo -e "4) ${GREEN}終了${NC}"
+    echo -n "選択 (1-4): "
+    read -r choice
+else
+    # 非インタラクティブモードではデフォルトでバックグラウンドモードを使用
+    echo "非インタラクティブモードでは、デフォルトでバックグラウンドモードを使用します。"
+    choice="2"
+fi
 
 case $choice in
-    1)
+    "1")
         echo -e "${YELLOW}開発モードでHyperFlux.ioを起動しています...${NC}"
         docker-compose up --build
         ;;
-    2)
+    "2")
         echo -e "${YELLOW}バックグラウンドモードでHyperFlux.ioを起動しています...${NC}"
         docker-compose up -d --build
         
@@ -182,7 +204,7 @@ case $choice in
         echo -e "${YELLOW}サービスを停止するには:${NC}"
         echo -e "  ${GREEN}docker-compose down${NC}"
         ;;
-    3)
+    "3")
         if [ -f "docker-compose.prod.yml" ]; then
             echo -e "${YELLOW}本番モードでHyperFlux.ioを起動しています...${NC}"
             docker-compose -f docker-compose.prod.yml up -d --build
@@ -215,12 +237,25 @@ case $choice in
             echo -e "  ${GREEN}docker-compose down${NC}"
         fi
         ;;
-    4)
+    "4")
         echo -e "${YELLOW}インストーラーを終了します。${NC}"
         exit 0
         ;;
     *)
-        echo -e "${RED}無効な選択です。${NC}"
-        exit 1
+        # デフォルトでバックグラウンドモードを選択
+        echo -e "${YELLOW}有効な選択肢ではありません。デフォルトでバックグラウンドモードを使用します。${NC}"
+        echo -e "${YELLOW}バックグラウンドモードでHyperFlux.ioを起動しています...${NC}"
+        docker-compose up -d --build
+        
+        # 起動確認
+        sleep 5
+        echo -e "${GREEN}HyperFlux.ioが起動しました！${NC}"
+        echo -e "${BLUE}ノードAPI: ${NC}http://localhost:54868"
+        echo -e "${BLUE}Webインターフェース: ${NC}http://localhost:54867"
+        echo ""
+        echo -e "${YELLOW}ログを確認するには:${NC}"
+        echo -e "  ${GREEN}docker-compose logs -f${NC}"
+        echo -e "${YELLOW}サービスを停止するには:${NC}"
+        echo -e "  ${GREEN}docker-compose down${NC}"
         ;;
 esac
