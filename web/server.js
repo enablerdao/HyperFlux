@@ -16,8 +16,8 @@ const MIME_TYPES = {
   '.svg': 'image/svg+xml'
 };
 
-// サーバーを作成
-const server = http.createServer((req, res) => {
+// リクエストハンドラ関数（テスト可能にするために分離）
+function handleRequest(req, res) {
   console.log(`${req.method} ${req.url}`);
   
   // CORSヘッダーを設定する関数
@@ -326,7 +326,17 @@ const server = http.createServer((req, res) => {
   });
 });
 
-// サーバーを起動
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running at http://localhost:${PORT}/`);
-});
+// サーバーを作成
+const server = http.createServer(handleRequest);
+
+// モジュールとして実行された場合のみサーバーを起動
+if (require.main === module) {
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running at http://localhost:${PORT}/`);
+  });
+}
+
+// テスト用にエクスポート
+module.exports = {
+  handleRequest
+};
