@@ -15,7 +15,7 @@
 「トランザクションが川の流れのように速く、スムーズに動くブロックチェーン。」
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/pof_consensus_C.png" alt="HyperFlux.io コンセンサスメカニズム" width="80%"/>
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/pof_consensus.svg" alt="HyperFlux.io コンセンサスメカニズム" width="80%"/>
 </div>
 
 ## 📋 概要
@@ -23,26 +23,26 @@ HyperFlux.ioは高速処理、スケーラビリティ、セキュリティを�
 初期フェーズでは50,000 TPS（1秒あたりのトランザクション数）を目標とし、フェーズ2では100,000 TPSを目指します。
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/system_architecture_A.png" alt="HyperFlux.io システムアーキテクチャ" width="80%"/>
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/system_architecture.svg" alt="HyperFlux.io システムアーキテクチャ" width="80%"/>
 </div>
 
 ## ✨ 特徴
 - **⚡ Proof of Flow (PoF)**: DAG、PoH、PoSを組み合わせた革新的なコンセンサスアルゴリズム
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/pof_consensus_E.png" alt="HyperFlux.io PoF比較" width="80%"/>
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/pof_consensus.svg" alt="HyperFlux.io PoF比較" width="80%"/>
 </div>
 
 - **🔄 動的シャーディング**: トラフィックに応じて自動的にシャード数を調整
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/dynamic_sharding_A.png" alt="HyperFlux.io 動的シャーディング" width="80%"/>
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/dynamic_sharding.svg" alt="HyperFlux.io 動的シャーディング" width="80%"/>
 </div>
 
 - **🧠 AI駆動型トランザクション管理**: 優先順位付けと予測によるスマートな処理
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/ai_transaction_A.png" alt="HyperFlux.io AI駆動型トランザクション管理" width="80%"/>
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/ai_transaction.svg" alt="HyperFlux.io AI駆動型トランザクション管理" width="80%"/>
 </div>
 
 - **🔒 高度なセキュリティ**: AES-256暗号化とマルチシグネチャによる堅牢な保護
@@ -53,7 +53,7 @@ HyperFlux.ioは高速処理、スケーラビリティ、セキュリティを�
 PoFは以下の3つの技術を組み合わせた革新的なコンセンサスメカニズムです：
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/pof_consensus_D.png" alt="HyperFlux.io PoFフロー" width="80%"/>
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/pof_consensus.svg" alt="HyperFlux.io PoFフロー" width="80%"/>
 </div>
 
 1. **有向非巡回グラフ (DAG)**
@@ -75,7 +75,7 @@ PoFは以下の3つの技術を組み合わせた革新的なコンセンサス�
 トラフィック量に応じて自動的にシャード数を調整する仕組みを実装：
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/dynamic_sharding_C.png" alt="HyperFlux.io シャード再分割" width="80%"/>
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/dynamic_sharding.svg" alt="HyperFlux.io シャード再分割" width="80%"/>
 </div>
 
 1. **シャード割り当て**
@@ -94,7 +94,7 @@ PoFは以下の3つの技術を組み合わせた革新的なコンセンサス�
 AIを活用してトランザクションの優先順位付けと予測を行います：
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/ai_transaction_B.png" alt="HyperFlux.io AIモデルアーキテクチャ" width="80%"/>
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/ai_transaction.svg" alt="HyperFlux.io AIモデルアーキテクチャ" width="80%"/>
 </div>
 
 1. **優先順位付け**
@@ -128,7 +128,7 @@ AIを活用してトランザクションの優先順位付けと予測を行い
 ## 🚀 クイックスタート
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/user_flow_A.png" alt="HyperFlux.io ユーザーフロー" width="80%"/>
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/user_flow.svg" alt="HyperFlux.io ユーザーフロー" width="80%"/>
 </div>
 
 > **注意**: Dockerビルドに問題がある場合は、以下の手順を試してください：
@@ -200,7 +200,7 @@ cd HyperFlux
 HyperFlux.ioはコマンドラインからの操作も可能です：
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/user_flow_D.png" alt="HyperFlux.io 開発フロー" width="80%"/>
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/user_flow.svg" alt="HyperFlux.io 開発フロー" width="80%"/>
 </div>
 
 <div align="center">
@@ -514,7 +514,7 @@ Webインターフェースでは、以下の3つのデータソースを切り�
 ### 主要コンポーネントの実装詳細
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/system_architecture_B.png" alt="HyperFlux.io コンポーネント間の相互作用" width="80%"/>
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/system_architecture.svg" alt="HyperFlux.io コンポーネント間の相互作用" width="80%"/>
 </div>
 
 #### 1. トランザクション処理
@@ -680,7 +680,7 @@ Webインターフェースは以下の方法でデプロイできます：
 ## コントリビューションガイド
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/user_flow_E.png" alt="HyperFlux.io エコシステム" width="80%"/>
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/user_flow.svg" alt="HyperFlux.io エコシステム" width="80%"/>
 </div>
 
 1. このリポジトリをフォーク
