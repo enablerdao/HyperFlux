@@ -1,5 +1,5 @@
 # マルチステージビルド - ビルダーステージ
-FROM rust:1.81 as builder
+FROM rust:1.70 as builder
 
 WORKDIR /app
 
@@ -15,25 +15,8 @@ RUN mkdir -p src && \
 # 実際のソースコードをコピー
 COPY src ./src
 
-# クロスプラットフォームサポートの設定
-# 環境変数ARGを使用して、ビルド時にターゲットアーキテクチャを指定可能に
-ARG TARGETARCH
-
-# アーキテクチャの検出と設定
-RUN if [ "$(uname -m)" = "aarch64" ] || [ "$(uname -m)" = "arm64" ] || [ "$TARGETARCH" = "arm64" ]; then \
-        echo "Building for ARM64 architecture"; \
-        rustup target add aarch64-unknown-linux-gnu; \
-        apt-get update && apt-get install -y --no-install-recommends \
-            gcc-aarch64-linux-gnu libc6-dev-arm64-cross; \
-        export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc; \
-        export CC_aarch64_unknown_linux_gnu=aarch64-linux-gnu-gcc; \
-        export CXX_aarch64_unknown_linux_gnu=aarch64-linux-gnu-g++; \
-        cargo build --release --target aarch64-unknown-linux-gnu; \
-    else \
-        echo "Building for x86_64 architecture"; \
-        rustup target add x86_64-unknown-linux-gnu; \
-        cargo build --release --target x86_64-unknown-linux-gnu; \
-    fi
+# 標準的なリリースビルドを実行
+RUN cargo build --release
 
 # ランタイムステージ - 軽量なベースイメージを使用
 FROM debian:bookworm-slim
@@ -52,25 +35,7 @@ RUN apt-get update && \
 RUN mkdir -p /app/data && chmod 777 /app/data
 
 # ビルダーステージからバイナリをコピー
-COPY --from=builder /app/target/aarch64-unknown-linux-gnu/release/hyperflux /app/hyperflux.arm64 || true
-COPY --from=builder /app/target/x86_64-unknown-linux-gnu/release/hyperflux /app/hyperflux.x86_64 || true
-
-# アーキテクチャに応じて適切なバイナリを選択
-RUN if [ "$(uname -m)" = "aarch64" ] || [ "$(uname -m)" = "arm64" ]; then \
-        if [ -f "/app/hyperflux.arm64" ]; then \
-            mv /app/hyperflux.arm64 /app/hyperflux; \
-        else \
-            echo "ARM64バイナリが見つかりません"; \
-            exit 1; \
-        fi; \
-    else \
-        if [ -f "/app/hyperflux.x86_64" ]; then \
-            mv /app/hyperflux.x86_64 /app/hyperflux; \
-        else \
-            echo "x86_64バイナリが見つかりません"; \
-            exit 1; \
-        fi; \
-    fi
+COPY --from=builder /app/target/release/hyperflux /app/hyperflux
 
 # バイナリが実行可能であることを確認
 RUN chmod +x /app/hyperflux
