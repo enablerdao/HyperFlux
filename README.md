@@ -1,17 +1,28 @@
 # HyperFlux.io
 
-## ビジョン
+<div align="center">
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/logo.png" alt="HyperFlux.io Logo" width="300"/>
+  <h3>次世代高速ブロックチェーンプラットフォーム</h3>
+  
+  [![GitHub Stars](https://img.shields.io/github/stars/enablerdao/HyperFlux?style=social)](https://github.com/enablerdao/HyperFlux/stargazers)
+  [![GitHub Forks](https://img.shields.io/github/forks/enablerdao/HyperFlux?style=social)](https://github.com/enablerdao/HyperFlux/network/members)
+  [![GitHub Issues](https://img.shields.io/github/issues/enablerdao/HyperFlux)](https://github.com/enablerdao/HyperFlux/issues)
+  [![GitHub License](https://img.shields.io/github/license/enablerdao/HyperFlux)](https://github.com/enablerdao/HyperFlux/blob/main/LICENSE)
+  [![Twitter Follow](https://img.shields.io/twitter/follow/HyperFluxIO?style=social)](https://twitter.com/HyperFluxIO)
+</div>
+
+## 🌊 ビジョン
 「トランザクションが川の流れのように速く、スムーズに動くブロックチェーン。」
 
-## 概要
+## 📋 概要
 HyperFlux.ioは高速処理、スケーラビリティ、セキュリティを兼ね備えた次世代ブロックチェーンプラットフォームです。
 初期フェーズでは50,000 TPS（1秒あたりのトランザクション数）を目標とし、フェーズ2では100,000 TPSを目指します。
 
-## 特徴
-- **Proof of Flow (PoF)**: DAG、PoH、PoSを組み合わせた革新的なコンセンサスアルゴリズム
-- **動的シャーディング**: トラフィックに応じて自動的にシャード数を調整
-- **AI駆動型トランザクション管理**: 優先順位付けと予測によるスマートな処理
-- **高度なセキュリティ**: AES-256暗号化とマルチシグネチャによる堅牢な保護
+## ✨ 特徴
+- **⚡ Proof of Flow (PoF)**: DAG、PoH、PoSを組み合わせた革新的なコンセンサスアルゴリズム
+- **🔄 動的シャーディング**: トラフィックに応じて自動的にシャード数を調整
+- **🧠 AI駆動型トランザクション管理**: 優先順位付けと予測によるスマートな処理
+- **🔒 高度なセキュリティ**: AES-256暗号化とマルチシグネチャによる堅牢な保護
 
 ## 技術アーキテクチャ
 
@@ -79,14 +90,20 @@ AIを活用してトランザクションの優先順位付けと予測を行い
    - トランザクションの作成と監視
    - 実装: `web/index.html`と`web/server.js`
 
-## クイックスタート
+## 🚀 クイックスタート
 
-### ワンクリックデプロイ
+### 🌐 ワンクリックデプロイ
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/enablerdao/HyperFlux)
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/enablerdao/HyperFlux)
+<div align="center">
+  <a href="https://render.com/deploy?repo=https://github.com/enablerdao/HyperFlux">
+    <img src="https://render.com/images/deploy-to-render-button.svg" alt="Deploy to Render" />
+  </a>
+  <a href="https://gitpod.io/#https://github.com/enablerdao/HyperFlux">
+    <img src="https://gitpod.io/button/open-in-gitpod.svg" alt="Open in Gitpod" />
+  </a>
+</div>
 
-### 1コマンドでの起動（すべてのOS対応）
+### 🔥 1コマンドでの起動（すべてのOS対応）
 
 以下の1コマンドで、HyperFlux.ioのノードとWebインターフェースを起動できます：
 
@@ -94,24 +111,53 @@ AIを活用してトランザクションの優先順位付けと予測を行い
 curl -fsSL https://raw.githubusercontent.com/enablerdao/HyperFlux/main/install.sh | bash
 ```
 
-または、リポジトリをクローンして手動で実行することもできます：
-
-```bash
-git clone https://github.com/enablerdao/HyperFlux.git && cd HyperFlux && ./install.sh
-```
+<details>
+<summary>💡 インストールスクリプトの詳細</summary>
 
 インストールスクリプトは以下の機能を提供します：
-- OSとアーキテクチャの自動検出
-- Dockerとdocker-composeの自動チェックとインストール補助
-- 開発モード、バックグラウンドモード、本番モードの選択肢
+- 🖥️ OSとアーキテクチャの自動検出（Linux、macOS、Windows、x86_64、ARM64）
+- 🐳 Dockerとdocker-composeの自動チェックとインストール補助
+- 🔄 インタラクティブモードと非インタラクティブモードの自動切り替え
+- 🚦 開発モード、バックグラウンドモード、本番モードの選択肢
 
-これにより、以下のサービスが起動します：
-- ノードサーバー: http://localhost:54868
-- Webインターフェース: http://localhost:54867
+</details>
 
-### コマンドラインインターフェース (CLI)
+<details>
+<summary>🔧 手動インストール</summary>
+
+リポジトリをクローンして手動で実行することもできます：
+
+```bash
+# リポジトリのクローン
+git clone https://github.com/enablerdao/HyperFlux.git
+
+# ディレクトリに移動
+cd HyperFlux
+
+# インストールスクリプトを実行
+./install.sh
+```
+
+</details>
+
+### 🌟 起動後のアクセス
+
+インストールが完了すると、以下のサービスが起動します：
+
+- 🔗 **ノードAPI**: [http://localhost:54868](http://localhost:54868)
+- 🖥️ **Webインターフェース**: [http://localhost:54867](http://localhost:54867)
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/dashboard.png" alt="HyperFlux.io Dashboard" width="80%"/>
+</div>
+
+### 💻 コマンドラインインターフェース (CLI)
 
 HyperFlux.ioはコマンドラインからの操作も可能です：
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/cli.png" alt="HyperFlux.io CLI" width="80%"/>
+</div>
 
 ```bash
 # CLIを起動
@@ -121,80 +167,136 @@ npm run cli
 node cli.js
 ```
 
-CLIで利用可能なコマンド：
-- `help` - ヘルプメッセージを表示
-- `info` - ノード情報を表示
-- `accounts` - すべてのアカウントを表示
-- `create-account NAME` - 新しいアカウントを作成
-- `balance ACCOUNT_ID` - アカウントの残高を表示
-- `transfer FROM TO AMOUNT [TOKEN_ID]` - 送金を実行
-- `pairs` - 取引ペアを表示
-- `orderbook BASE QUOTE` - オーダーブックを表示
-- `create-order ACCOUNT_ID BASE QUOTE TYPE PRICE AMOUNT` - 注文を作成
-- `exit` - CLIを終了
+<details>
+<summary>📋 利用可能なCLIコマンド一覧</summary>
 
-### npm スクリプト
+| コマンド | 説明 | 例 |
+|---------|------|-----|
+| `help` | ヘルプメッセージを表示 | `help` |
+| `info` | ノード情報を表示 | `info` |
+| `accounts` | すべてのアカウントを表示 | `accounts` |
+| `create-account NAME` | 新しいアカウントを作成 | `create-account alice` |
+| `balance ACCOUNT_ID` | アカウントの残高を表示 | `balance acc_123456` |
+| `transfer FROM TO AMOUNT [TOKEN_ID]` | 送金を実行 | `transfer acc_123 acc_456 100 BTC` |
+| `pairs` | 取引ペアを表示 | `pairs` |
+| `orderbook BASE QUOTE` | オーダーブックを表示 | `orderbook BTC USD` |
+| `create-order ACCOUNT_ID BASE QUOTE TYPE PRICE AMOUNT` | 注文を作成 | `create-order acc_123 BTC USD buy 30000 0.5` |
+| `exit` | CLIを終了 | `exit` |
+
+</details>
+
+### ⚙️ 開発者向けスクリプト
+
+<details>
+<summary>📦 npm スクリプト</summary>
 
 package.jsonに定義されたスクリプトを使用して、簡単に操作できます：
 
+| スクリプト | 説明 | コマンド |
+|-----------|------|---------|
+| `all` | すべてのサービスを1つのターミナルで起動 | `npm run all` |
+| `start` | Rustノードを起動 | `npm start` |
+| `web` | Webサーバーを起動 | `npm run web` |
+| `cli` | CLIを起動 | `npm run cli` |
+| `docker` | Dockerでノードとウェブサーバーを起動（フォアグラウンド） | `npm run docker` |
+| `docker-build` | Dockerイメージをビルド | `npm run docker-build` |
+| `docker-stop` | Dockerコンテナを停止 | `npm run docker-stop` |
+| `docker:dev` | 開発環境でDockerを起動（バックグラウンド） | `npm run docker:dev` |
+| `docker:prod` | 本番環境でDockerを起動（バックグラウンド） | `npm run docker:prod` |
+| `docker:dev:rebuild` | 開発環境でイメージを再ビルドして起動 | `npm run docker:dev:rebuild` |
+| `docker:prod:rebuild` | 本番環境でイメージを再ビルドして起動 | `npm run docker:prod:rebuild` |
+
+</details>
+
+<details>
+<summary>🛠️ シェルスクリプト</summary>
+
+直接シェルスクリプトを実行することもできます：
+
+#### すべてのサービスを1つのターミナルで起動
 ```bash
-# すべてのサービスを1つのターミナルで起動（ノード、Web、CLI）
-npm run all
-
-# Rustノードを起動
-npm start
-
-# Webサーバーを起動
-npm run web
-
-# CLIを起動
-npm run cli
-
-# Docker関連のコマンド
-npm run docker              # Dockerでノードとウェブサーバーを起動（フォアグラウンド）
-npm run docker-build        # Dockerイメージをビルド
-npm run docker-stop         # Dockerコンテナを停止
-
-# 改善されたDocker起動スクリプト
-npm run docker:dev          # 開発環境でDockerを起動（バックグラウンド）
-npm run docker:prod         # 本番環境でDockerを起動（バックグラウンド）
-npm run docker:dev:rebuild  # 開発環境でイメージを再ビルドして起動
-npm run docker:prod:rebuild # 本番環境でイメージを再ビルドして起動
-```
-
-### 直接スクリプトを実行
-
-```bash
-# すべてのサービスを1つのターミナルで起動
 ./start.sh
-
-# Dockerサービスを起動（オプション指定可能）
-./docker-start.sh [オプション]
-
-# オプション:
-#   -e, --env ENV      環境を指定 (dev または prod) [デフォルト: dev]
-#   -r, --rebuild      イメージを再ビルド
-#   -h, --help         ヘルプメッセージを表示
-
-# 例:
-./docker-start.sh                  # 開発環境で起動
-./docker-start.sh -e prod          # 本番環境で起動
-./docker-start.sh -r               # 開発環境でイメージを再ビルドして起動
-./docker-start.sh -e prod -r       # 本番環境でイメージを再ビルドして起動
 ```
 
-### 前提条件
-- Git
-- Docker と Docker Compose
-- Node.js (CLIを使用する場合)
+#### Dockerサービスを起動（オプション指定可能）
+```bash
+./docker-start.sh [オプション]
+```
 
-### クロスプラットフォームサポート
+**オプション:**
+- `-e, --env ENV` - 環境を指定 (dev または prod) [デフォルト: dev]
+- `-r, --rebuild` - イメージを再ビルド
+- `-h, --help` - ヘルプメッセージを表示
 
-HyperFlux.ioは以下のプラットフォームで動作します：
+**例:**
+```bash
+# 開発環境で起動
+./docker-start.sh
 
-- **Linux**: x86_64およびARM64アーキテクチャ（Ubuntu、Debian、CentOS、Alpine）
-- **macOS**: Intel ChipおよびApple Silicon（M1/M2/M3）
-- **Windows**: WSL2（Windows Subsystem for Linux 2）経由
+# 本番環境で起動
+./docker-start.sh -e prod
+
+# 開発環境でイメージを再ビルドして起動
+./docker-start.sh -r
+
+# 本番環境でイメージを再ビルドして起動
+./docker-start.sh -e prod -r
+```
+
+</details>
+
+### 🔍 前提条件
+
+<details>
+<summary>必要なソフトウェア</summary>
+
+- **Git**: バージョン管理システム
+- **Docker**: コンテナ化プラットフォーム
+- **Docker Compose**: マルチコンテナDockerアプリケーションの定義と実行ツール
+- **Node.js** (オプション): CLIを使用する場合のみ必要
+
+インストールスクリプトは、これらの依存関係の有無を自動的にチェックし、必要に応じてインストールをサポートします。
+
+</details>
+
+### 🌍 クロスプラットフォームサポート
+
+<div align="center">
+  <table>
+    <tr>
+      <th>プラットフォーム</th>
+      <th>サポートされるアーキテクチャ</th>
+      <th>テスト済みバージョン</th>
+    </tr>
+    <tr>
+      <td>
+        <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/linux.png" width="20" alt="Linux" />
+        Linux
+      </td>
+      <td>x86_64, ARM64</td>
+      <td>Ubuntu 20.04+, Debian 11+, CentOS 8+, Alpine 3.15+</td>
+    </tr>
+    <tr>
+      <td>
+        <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/macos.png" width="20" alt="macOS" />
+        macOS
+      </td>
+      <td>Intel Chip, Apple Silicon (M1/M2/M3)</td>
+      <td>macOS 11 (Big Sur)+</td>
+    </tr>
+    <tr>
+      <td>
+        <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/windows.png" width="20" alt="Windows" />
+        Windows
+      </td>
+      <td>x86_64 (WSL2経由)</td>
+      <td>Windows 10/11 with WSL2</td>
+    </tr>
+  </table>
+</div>
+
+<details>
+<summary>🔧 特定のアーキテクチャ向けにビルドする方法</summary>
 
 Dockerfileはマルチアーキテクチャビルドをサポートしており、ビルド時に自動的に適切なアーキテクチャを検出します。ARM64プラットフォーム（Raspberry Pi、Apple Silicon Macなど）でビルドする場合は、以下のコマンドを使用します：
 
@@ -209,6 +311,8 @@ TARGETARCH=arm64 docker-compose build
 # 環境変数を設定してスクリプトを実行
 TARGETARCH=arm64 ./docker-start.sh -r
 ```
+
+</details>
 
 ## 詳細な実装ガイド
 
