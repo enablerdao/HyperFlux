@@ -269,7 +269,7 @@ pub async fn handle_transfer(
         Ok(tx) => {
             // ノードにトランザクションを送信
             let mut node = node.lock().await;
-            match node.add_transaction(tx.clone()) {
+            match node.submit_transaction(tx.clone()) {
                 Ok(_) => {
                     let response = TransferResponse {
                         transaction_id: tx.id,
