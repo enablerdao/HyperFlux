@@ -204,7 +204,7 @@ HyperFlux.ioはコマンドラインからの操作も可能です：
 </div>
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/cli.png" alt="HyperFlux.io CLI" width="80%"/>
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/cli.svg" alt="HyperFlux.io CLI" width="80%"/>
 </div>
 
 ```bash
