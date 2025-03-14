@@ -19,7 +19,7 @@ COPY src ./src
 RUN cargo build --release
 
 # Create the runtime image
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 WORKDIR /app
 

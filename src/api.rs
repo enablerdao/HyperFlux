@@ -1,5 +1,8 @@
+use crate::api_handlers::*;
+use crate::dex::{DexManager, Order, OrderType, TradingPair, Trade};
 use crate::node::Node;
 use crate::transaction::Transaction;
+use crate::wallet::{Account, WalletManager};
 use log::{error, info};
 use serde::{Deserialize, Serialize};
 use std::convert::Infallible;
@@ -12,6 +15,10 @@ use base64;
 pub struct ApiServer {
     /// ノードの参照
     node: Arc<Mutex<Node>>,
+    /// ウォレットマネージャーの参照
+    wallet_manager: Arc<WalletManager>,
+    /// DEXマネージャーの参照
+    dex_manager: Arc<DexManager>,
     /// サーバーのポート
     port: u16,
 }
@@ -53,38 +60,118 @@ struct CreateTransactionResponse {
 
 impl ApiServer {
     /// 新しいAPIサーバーを作成
-    pub fn new(node: Arc<Mutex<Node>>, port: u16) -> Self {
-        Self { node, port }
+    pub fn new(
+        node: Arc<Mutex<Node>>, 
+        wallet_manager: Arc<WalletManager>,
+        dex_manager: Arc<DexManager>,
+        port: u16
+    ) -> Self {
+        Self { 
+            node, 
+            wallet_manager, 
+            dex_manager, 
+            port 
+        }
     }
     
     /// サーバーを起動
     pub async fn start(&self) {
         info!("Starting API server on port {}", self.port);
         
-        // ノード情報を取得するエンドポイント
+        // 各マネージャーの参照をクローン
         let node_clone = Arc::clone(&self.node);
+        let wallet_manager_clone = Arc::clone(&self.wallet_manager);
+        let dex_manager_clone = Arc::clone(&self.dex_manager);
+        
+        // ブロックチェーンAPI
+        // ノード情報を取得するエンドポイント
         let node_info = warp::path("info")
             .and(warp::get())
-            .and(with_node(node_clone))
+            .and(with_node(Arc::clone(&node_clone)))
             .and_then(handle_node_info);
         
         // トランザクションを作成するエンドポイント
-        let node_clone = Arc::clone(&self.node);
         let create_tx = warp::path("transactions")
             .and(warp::post())
             .and(warp::body::json())
-            .and(with_node(node_clone))
+            .and(with_node(Arc::clone(&node_clone)))
             .and_then(handle_create_transaction);
+        
+        // ウォレットAPI
+        // アカウント作成エンドポイント
+        let create_account = warp::path("accounts")
+            .and(warp::post())
+            .and(warp::body::json())
+            .and(with_wallet_manager(Arc::clone(&wallet_manager_clone)))
+            .and_then(handle_create_account);
+        
+        // アカウント情報取得エンドポイント
+        let get_account = warp::path!("accounts" / String)
+            .and(warp::get())
+            .and(with_wallet_manager(Arc::clone(&wallet_manager_clone)))
+            .and_then(handle_get_account);
+        
+        // 送金エンドポイント
+        let transfer = warp::path("transfer")
+            .and(warp::post())
+            .and(warp::body::json())
+            .and(with_wallet_manager(Arc::clone(&wallet_manager_clone)))
+            .and(with_node(Arc::clone(&node_clone)))
+            .and_then(handle_transfer);
+        
+        // DEX API
+        // 取引ペア追加エンドポイント
+        let add_trading_pair = warp::path("trading-pairs")
+            .and(warp::post())
+            .and(warp::body::json())
+            .and(with_dex_manager(Arc::clone(&dex_manager_clone)))
+            .and_then(handle_add_trading_pair);
+        
+        // 注文作成エンドポイント
+        let create_order = warp::path("orders")
+            .and(warp::post())
+            .and(warp::body::json())
+            .and(with_dex_manager(Arc::clone(&dex_manager_clone)))
+            .and_then(handle_create_order);
+        
+        // 注文キャンセルエンドポイント
+        let cancel_order = warp::path!("orders" / String)
+            .and(warp::delete())
+            .and(warp::query::<CancelOrderQuery>())
+            .and(with_dex_manager(Arc::clone(&dex_manager_clone)))
+            .and_then(handle_cancel_order);
+        
+        // オーダーブック取得エンドポイント
+        let get_order_book = warp::path("order-book")
+            .and(warp::get())
+            .and(warp::query::<OrderBookQuery>())
+            .and(with_dex_manager(Arc::clone(&dex_manager_clone)))
+            .and_then(handle_get_order_book);
+        
+        // 取引履歴取得エンドポイント
+        let get_trade_history = warp::path("trade-history")
+            .and(warp::get())
+            .and(warp::query::<TradeHistoryQuery>())
+            .and(with_dex_manager(Arc::clone(&dex_manager_clone)))
+            .and_then(handle_get_trade_history);
         
         // CORSを設定
         let cors = warp::cors()
             .allow_any_origin()
-            .allow_methods(vec!["GET", "POST"])
+            .allow_methods(vec!["GET", "POST", "DELETE", "OPTIONS"])
             .allow_headers(vec!["Content-Type"]);
         
         // ルートを結合
         let routes = node_info
             .or(create_tx)
+            .or(create_account)
+            .or(get_account)
+            .or(transfer)
+            .or(add_trading_pair)
+            .or(create_order)
+            .or(cancel_order)
+            .or(get_order_book)
+            .or(get_trade_history)
             .with(cors)
             .with(warp::log("api"));
         
@@ -100,6 +187,20 @@ fn with_node(
     node: Arc<Mutex<Node>>,
 ) -> impl Filter<Extract = (Arc<Mutex<Node>>,), Error = Infallible> + Clone {
     warp::any().map(move || Arc::clone(&node))
+}
+
+/// ウォレットマネージャーの参照をフィルターに追加
+fn with_wallet_manager(
+    wallet_manager: Arc<WalletManager>,
+) -> impl Filter<Extract = (Arc<WalletManager>,), Error = Infallible> + Clone {
+    warp::any().map(move || Arc::clone(&wallet_manager))
+}
+
+/// DEXマネージャーの参照をフィルターに追加
+fn with_dex_manager(
+    dex_manager: Arc<DexManager>,
+) -> impl Filter<Extract = (Arc<DexManager>,), Error = Infallible> + Clone {
+    warp::any().map(move || Arc::clone(&dex_manager))
 }
 
 /// ノード情報を取得するハンドラー
