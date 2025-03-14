@@ -21,3 +21,12 @@ rand = "0.8"
 futures = "0.3"
 async-trait = "0.1"
 thiserror = "1.0"
+
+# 以下の依存関係のバージョンを明示的に指定して、互換性の問題を回避
+litemap = "=0.7.4"  # 0.7.5以前のバージョンを使用
+hashbrown = "=0.14.3"
+indexmap = "=2.1.0"
+
+[package.metadata.docker]
+# Rustのバージョン要件を明示
+rust_version = "1.81"

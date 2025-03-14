@@ -1,4 +1,4 @@
-FROM rust:1.75 as builder
+FROM rust:1.81 as builder
 
 WORKDIR /app
 
@@ -8,6 +8,7 @@ COPY Cargo.toml ./
 # Create a dummy main.rs to build dependencies
 RUN mkdir -p src && \
     echo "fn main() {}" > src/main.rs && \
+    cargo update && \
     cargo build --release && \
     rm -rf src
 

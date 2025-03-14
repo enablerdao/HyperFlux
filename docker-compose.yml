@@ -18,7 +18,7 @@ services:
     working_dir: /app
     volumes:
       - ./web:/app
-    command: node server.js
+    command: sh -c "npm install --no-fund --no-audit --loglevel=error && node server.js"
     ports:
       - "57273:54867"
     depends_on:
