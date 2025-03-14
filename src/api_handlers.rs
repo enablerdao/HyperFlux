@@ -211,11 +211,11 @@ pub async fn handle_create_account(
         }
         Err(e) => {
             error!("Failed to create account: {}", e);
-            let response = warp::reply::json(&serde_json::json!({
+            let json_response = serde_json::json!({
                 "error": format!("Failed to create account: {}", e)
-            }));
+            });
             Ok(warp::reply::with_status(
-                response,
+                warp::reply::json(&json_response),
                 warp::http::StatusCode::BAD_REQUEST,
             ))
         }
@@ -240,11 +240,11 @@ pub async fn handle_get_account(
             Ok(warp::reply::json(&response))
         }
         None => {
-            let response = warp::reply::json(&serde_json::json!({
+            let json_response = serde_json::json!({
                 "error": format!("Account {} not found", account_id)
-            }));
+            });
             Ok(warp::reply::with_status(
-                response,
+                warp::reply::json(&json_response),
                 warp::http::StatusCode::NOT_FOUND,
             ))
         }
@@ -278,11 +278,11 @@ pub async fn handle_transfer(
                 }
                 Err(e) => {
                     error!("Failed to add transaction: {}", e);
-                    let response = warp::reply::json(&serde_json::json!({
+                    let json_response = serde_json::json!({
                         "error": format!("Failed to add transaction: {}", e)
-                    }));
+                    });
                     Ok(warp::reply::with_status(
-                        response,
+                        warp::reply::json(&json_response),
                         warp::http::StatusCode::INTERNAL_SERVER_ERROR,
                     ))
                 }
@@ -290,11 +290,11 @@ pub async fn handle_transfer(
         }
         Err(e) => {
             error!("Failed to create transaction: {}", e);
-            let response = warp::reply::json(&serde_json::json!({
+            let json_response = serde_json::json!({
                 "error": format!("Failed to create transaction: {}", e)
-            }));
+            });
             Ok(warp::reply::with_status(
-                response,
+                warp::reply::json(&json_response),
                 warp::http::StatusCode::BAD_REQUEST,
             ))
         }
@@ -326,11 +326,11 @@ pub async fn handle_create_order(
         "buy" => OrderType::Buy,
         "sell" => OrderType::Sell,
         _ => {
-            let response = warp::reply::json(&serde_json::json!({
+            let json_response = serde_json::json!({
                 "error": format!("Invalid order type: {}", req.order_type)
-            }));
+            });
             return Ok(warp::reply::with_status(
-                response,
+                warp::reply::json(&json_response),
                 warp::http::StatusCode::BAD_REQUEST,
             ));
         }
@@ -369,11 +369,11 @@ pub async fn handle_create_order(
         }
         Err(e) => {
             error!("Failed to create order: {}", e);
-            let response = warp::reply::json(&serde_json::json!({
+            let json_response = serde_json::json!({
                 "error": format!("Failed to create order: {}", e)
-            }));
+            });
             Ok(warp::reply::with_status(
-                response,
+                warp::reply::json(&json_response),
                 warp::http::StatusCode::BAD_REQUEST,
             ))
         }
@@ -396,11 +396,11 @@ pub async fn handle_cancel_order(
         }
         Err(e) => {
             error!("Failed to cancel order: {}", e);
-            let response = warp::reply::json(&serde_json::json!({
+            let json_response = serde_json::json!({
                 "error": format!("Failed to cancel order: {}", e)
-            }));
+            });
             Ok(warp::reply::with_status(
-                response,
+                warp::reply::json(&json_response),
                 warp::http::StatusCode::BAD_REQUEST,
             ))
         }
@@ -439,11 +439,11 @@ pub async fn handle_get_order_book(
         }
         Err(e) => {
             error!("Failed to get order book: {}", e);
-            let response = warp::reply::json(&serde_json::json!({
+            let json_response = serde_json::json!({
                 "error": format!("Failed to get order book: {}", e)
-            }));
+            });
             Ok(warp::reply::with_status(
-                response,
+                warp::reply::json(&json_response),
                 warp::http::StatusCode::BAD_REQUEST,
             ))
         }
@@ -479,11 +479,11 @@ pub async fn handle_get_trade_history(
         }
         Err(e) => {
             error!("Failed to get trade history: {}", e);
-            let response = warp::reply::json(&serde_json::json!({
+            let json_response = serde_json::json!({
                 "error": format!("Failed to get trade history: {}", e)
-            }));
+            });
             Ok(warp::reply::with_status(
-                response,
+                warp::reply::json(&json_response),
                 warp::http::StatusCode::BAD_REQUEST,
             ))
         }

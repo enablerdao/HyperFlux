@@ -162,36 +162,64 @@ impl WalletManager {
         
         let mut accounts = self.accounts.lock().unwrap();
         
-        // 送信元アカウントを取得
-        let from_account = accounts.get_mut(&tx_data.from)
-            .ok_or_else(|| format!("From account {} not found", tx_data.from))?;
-        
-        // 送信先アカウントを取得
-        let to_account = accounts.get_mut(&tx_data.to)
-            .ok_or_else(|| format!("To account {} not found", tx_data.to))?;
+        // アカウントが存在するか確認
+        if !accounts.contains_key(&tx_data.from) {
+            return Err(format!("From account {} not found", tx_data.from));
+        }
+        if !accounts.contains_key(&tx_data.to) {
+            return Err(format!("To account {} not found", tx_data.to));
+        }
         
         // 残高を更新
         if let Some(token_id) = &tx_data.token_id {
             // トークン送金の場合
-            let from_balance = from_account.token_balances.entry(token_id.clone()).or_insert(0.0);
-            if *from_balance < tx_data.amount {
-                return Err(format!("Insufficient token balance: {} < {}", from_balance, tx_data.amount));
+            // 送信元アカウントのトークン残高を確認
+            let from_balance = {
+                let from_account = accounts.get(&tx_data.from).unwrap();
+                let balance = from_account.token_balances.get(token_id).unwrap_or(&0.0);
+                if *balance < tx_data.amount {
+                    return Err(format!("Insufficient token balance: {} < {}", balance, tx_data.amount));
+                }
+                *balance
+            };
+            
+            // 送信元アカウントのトークン残高を減らす
+            {
+                let from_account = accounts.get_mut(&tx_data.from).unwrap();
+                let balance = from_account.token_balances.entry(token_id.clone()).or_insert(0.0);
+                *balance -= tx_data.amount;
             }
             
-            *from_balance -= tx_data.amount;
-            
-            let to_balance = to_account.token_balances.entry(token_id.clone()).or_insert(0.0);
-            *to_balance += tx_data.amount;
+            // 送信先アカウントのトークン残高を増やす
+            {
+                let to_account = accounts.get_mut(&tx_data.to).unwrap();
+                let balance = to_account.token_balances.entry(token_id.clone()).or_insert(0.0);
+                *balance += tx_data.amount;
+            }
             
             info!("Token transfer: {} {} from {} to {}", tx_data.amount, token_id, tx_data.from, tx_data.to);
         } else {
             // 通常の送金の場合
-            if from_account.balance < tx_data.amount {
-                return Err(format!("Insufficient balance: {} < {}", from_account.balance, tx_data.amount));
+            // 送信元アカウントの残高を確認
+            let from_balance = {
+                let from_account = accounts.get(&tx_data.from).unwrap();
+                if from_account.balance < tx_data.amount {
+                    return Err(format!("Insufficient balance: {} < {}", from_account.balance, tx_data.amount));
+                }
+                from_account.balance
+            };
+            
+            // 送信元アカウントの残高を減らす
+            {
+                let from_account = accounts.get_mut(&tx_data.from).unwrap();
+                from_account.balance -= tx_data.amount;
             }
             
-            from_account.balance -= tx_data.amount;
-            to_account.balance += tx_data.amount;
+            // 送信先アカウントの残高を増やす
+            {
+                let to_account = accounts.get_mut(&tx_data.to).unwrap();
+                to_account.balance += tx_data.amount;
+            }
             
             info!("Transfer: {} from {} to {}", tx_data.amount, tx_data.from, tx_data.to);
         }
@@ -205,42 +233,55 @@ impl WalletManager {
         buyer_id: &str,
         seller_id: &str,
         base_token: &str,
-        quote_token: &str,
+        _quote_token: &str,  // 未使用変数に_を追加
         price: f64,
         amount: f64,
     ) -> Result<(), String> {
         let mut accounts = self.accounts.lock().unwrap();
         
-        // 買い手と売り手のアカウントを取得
-        let buyer = accounts.get_mut(buyer_id)
-            .ok_or_else(|| format!("Buyer account {} not found", buyer_id))?;
-        
-        let seller = accounts.get_mut(seller_id)
-            .ok_or_else(|| format!("Seller account {} not found", seller_id))?;
+        // アカウントが存在するか確認
+        if !accounts.contains_key(buyer_id) {
+            return Err(format!("Buyer account {} not found", buyer_id));
+        }
+        if !accounts.contains_key(seller_id) {
+            return Err(format!("Seller account {} not found", seller_id));
+        }
         
         // 取引金額を計算
         let total_price = price * amount;
         
         // 買い手の残高を確認
-        if buyer.balance < total_price {
-            return Err(format!("Buyer has insufficient balance: {} < {}", buyer.balance, total_price));
+        {
+            let buyer = accounts.get(buyer_id).unwrap();
+            if buyer.balance < total_price {
+                return Err(format!("Buyer has insufficient balance: {} < {}", buyer.balance, total_price));
+            }
         }
         
         // 売り手のトークン残高を確認
-        let seller_token_balance = seller.token_balances.entry(base_token.to_string()).or_insert(0.0);
-        if *seller_token_balance < amount {
-            return Err(format!("Seller has insufficient token balance: {} < {}", seller_token_balance, amount));
+        {
+            let seller = accounts.get(seller_id).unwrap();
+            let seller_token_balance = seller.token_balances.get(base_token).unwrap_or(&0.0);
+            if *seller_token_balance < amount {
+                return Err(format!("Seller has insufficient token balance: {} < {}", seller_token_balance, amount));
+            }
         }
         
-        // 残高を更新
-        buyer.balance -= total_price;
-        seller.balance += total_price;
+        // 買い手の残高を更新
+        {
+            let buyer = accounts.get_mut(buyer_id).unwrap();
+            buyer.balance -= total_price;
+            let buyer_token_balance = buyer.token_balances.entry(base_token.to_string()).or_insert(0.0);
+            *buyer_token_balance += amount;
+        }
         
-        // トークン残高を更新
-        *seller_token_balance -= amount;
-        
-        let buyer_token_balance = buyer.token_balances.entry(base_token.to_string()).or_insert(0.0);
-        *buyer_token_balance += amount;
+        // 売り手の残高を更新
+        {
+            let seller = accounts.get_mut(seller_id).unwrap();
+            seller.balance += total_price;
+            let seller_token_balance = seller.token_balances.entry(base_token.to_string()).or_insert(0.0);
+            *seller_token_balance -= amount;
+        }
         
         info!("Trade executed: {} {} from {} to {} at price {}", 
             amount, base_token, seller_id, buyer_id, price);
