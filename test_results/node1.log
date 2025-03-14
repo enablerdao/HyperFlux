@@ -1,0 +1,79 @@
+[0;34m[INFO][0m 設定ファイルを読み込み中: ./config/default.toml
+[node]
+id = "auto"                   # 自動生成または指定
+host = "0.0.0.0"              # リッスンするホスト
+port = 54868                  # APIポート
+data_dir = "./data"           # データディレクトリ
+log_level = "info"            # ログレベル: debug, info, warn, error
+[consensus]
+algorithm = "pof"             # コンセンサスアルゴリズム
+validator_count = 4           # バリデータ数
+block_time_ms = 50            # ブロック生成間隔（ミリ秒）
+tx_timeout_ms = 5000          # トランザクションタイムアウト（ミリ秒）
+[sharding]
+enabled = true                # シャーディングの有効化
+initial_shards = 256          # 初期シャード数
+min_shards = 64               # 最小シャード数
+max_shards = 1024             # 最大シャード数
+auto_scaling = true           # 自動スケーリングの有効化
+scaling_threshold = 0.8       # スケーリングしきい値（負荷率）
+[ai]
+enabled = true                # AI機能の有効化
+model_path = "./models/priority.onnx"  # 優先度計算モデルのパス
+batch_size = 100              # バッチサイズ
+prediction_window_ms = 1000   # 予測ウィンドウ（ミリ秒）
+[security]
+encryption = "aes-256-gcm"    # 暗号化アルゴリズム
+multi_sig_threshold = 2       # マルチシグの閾値
+zk_snarks_enabled = false     # zk-SNARKsの有効化（オプション）
+[api]
+cors_enabled = true           # CORSの有効化
+rate_limit = 1000             # レート制限（リクエスト/分）
+timeout_ms = 30000            # APIタイムアウト（ミリ秒）
+[network]
+max_peers = 50                # 最大ピア数
+bootstrap_nodes = [           # ブートストラップノード
+  "node1.hyperflux.io:54868",
+  "node2.hyperflux.io:54868"
+]
+heartbeat_interval_ms = 5000  # ハートビート間隔（ミリ秒）
+[storage]
+engine = "rocksdb"            # ストレージエンジン
+cache_size_mb = 512           # キャッシュサイズ（MB）
+compaction_style = "level"    # 圧縮スタイル
+[metrics]
+enabled = true                # メトリクスの有効化
+prometheus_enabled = true     # Prometheusエクスポートの有効化
+prometheus_port = 9090        # Prometheusポート
+[0;34m[INFO][0m データディレクトリ: ./data/node1
+[0;34m[INFO][0m HyperFlux.io ノードを起動中...
+[0;34m[INFO][0m ノードID: node1
+[0;34m[INFO][0m ポート: 54868
+[0;34m[INFO][0m ログレベル: info
+[0;34m[INFO][0m DAGを初期化中...
+[0;34m[INFO][0m シャーディングマネージャを初期化中 (シャード数: 256)...
+[0;34m[INFO][0m コンセンサスエンジンを初期化中...
+[0;34m[INFO][0m APIサーバーを起動中 (ポート: 54868)...
+[0;32m[SUCCESS][0m ノードの起動が完了しました
+[0;34m[INFO][0m APIエンドポイント: http://localhost:54868
+[0;34m[INFO][0m Ctrl+Cで終了
+[0;34m[INFO][0m 現在のTPS: 31597
+[0;34m[INFO][0m 確認済みトランザクション数: 789
+[0;34m[INFO][0m 現在のTPS: 39641
+[0;34m[INFO][0m 確認済みトランザクション数: 1718
+[0;34m[INFO][0m 現在のTPS: 30644
+[0;34m[INFO][0m 確認済みトランザクション数: 2444
+[0;34m[INFO][0m 現在のTPS: 44347
+[0;34m[INFO][0m 確認済みトランザクション数: 2584
+[0;34m[INFO][0m 現在のTPS: 38975
+[0;34m[INFO][0m 確認済みトランザクション数: 2686
+[0;34m[INFO][0m 現在のTPS: 47944
+[0;34m[INFO][0m 確認済みトランザクション数: 2968
+[0;34m[INFO][0m 現在のTPS: 41259
+[0;34m[INFO][0m 確認済みトランザクション数: 3398
+[0;34m[INFO][0m 現在のTPS: 44296
+[0;34m[INFO][0m 確認済みトランザクション数: 4185
+[0;34m[INFO][0m 現在のTPS: 46016
+[0;34m[INFO][0m 確認済みトランザクション数: 4349
+[0;34m[INFO][0m 現在のTPS: 36699
+[0;34m[INFO][0m 確認済みトランザクション数: 4701
