@@ -139,14 +139,16 @@ npm run web
 # CLIを起動
 npm run cli
 
-# Dockerでノードとウェブサーバーを起動
-npm run docker
+# Docker関連のコマンド
+npm run docker              # Dockerでノードとウェブサーバーを起動（フォアグラウンド）
+npm run docker-build        # Dockerイメージをビルド
+npm run docker-stop         # Dockerコンテナを停止
 
-# Dockerイメージをビルド
-npm run docker-build
-
-# Dockerコンテナを停止
-npm run docker-stop
+# 改善されたDocker起動スクリプト
+npm run docker:dev          # 開発環境でDockerを起動（バックグラウンド）
+npm run docker:prod         # 本番環境でDockerを起動（バックグラウンド）
+npm run docker:dev:rebuild  # 開発環境でイメージを再ビルドして起動
+npm run docker:prod:rebuild # 本番環境でイメージを再ビルドして起動
 ```
 
 ### 直接スクリプトを実行
@@ -154,12 +156,48 @@ npm run docker-stop
 ```bash
 # すべてのサービスを1つのターミナルで起動
 ./start.sh
+
+# Dockerサービスを起動（オプション指定可能）
+./docker-start.sh [オプション]
+
+# オプション:
+#   -e, --env ENV      環境を指定 (dev または prod) [デフォルト: dev]
+#   -r, --rebuild      イメージを再ビルド
+#   -h, --help         ヘルプメッセージを表示
+
+# 例:
+./docker-start.sh                  # 開発環境で起動
+./docker-start.sh -e prod          # 本番環境で起動
+./docker-start.sh -r               # 開発環境でイメージを再ビルドして起動
+./docker-start.sh -e prod -r       # 本番環境でイメージを再ビルドして起動
 ```
 
 ### 前提条件
 - Git
 - Docker と Docker Compose
 - Node.js (CLIを使用する場合)
+
+### クロスプラットフォームサポート
+
+HyperFlux.ioは以下のプラットフォームで動作します：
+
+- **Linux**: x86_64およびARM64アーキテクチャ（Ubuntu、Debian、CentOS、Alpine）
+- **macOS**: Intel ChipおよびApple Silicon（M1/M2/M3）
+- **Windows**: WSL2（Windows Subsystem for Linux 2）経由
+
+Dockerfileはマルチアーキテクチャビルドをサポートしており、ビルド時に自動的に適切なアーキテクチャを検出します。ARM64プラットフォーム（Raspberry Pi、Apple Silicon Macなど）でビルドする場合は、以下のコマンドを使用します：
+
+```bash
+# ARM64向けにビルド
+TARGETARCH=arm64 docker-compose build
+```
+
+または、docker-start.shスクリプトを使用する場合：
+
+```bash
+# 環境変数を設定してスクリプトを実行
+TARGETARCH=arm64 ./docker-start.sh -r
+```
 
 ## 詳細な実装ガイド
 

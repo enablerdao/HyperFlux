@@ -1,48 +1,70 @@
+# マルチステージビルド - ビルダーステージ
 FROM rust:1.81 as builder
 
 WORKDIR /app
 
-# Copy the Cargo.toml and Cargo.lock files
-COPY Cargo.toml ./
+# キャッシュ最適化のためにまずCargo.tomlとCargo.lockをコピー
+COPY Cargo.toml Cargo.lock* ./
 
-# Create a dummy main.rs to build dependencies
+# 依存関係のみをビルドするためのダミーソースを作成
 RUN mkdir -p src && \
-    echo "fn main() {}" > src/main.rs && \
-    cargo update && \
+    echo "fn main() {println!(\"Dummy build\");}" > src/main.rs && \
     cargo build --release && \
     rm -rf src
 
-# Copy the actual source code
+# 実際のソースコードをコピー
 COPY src ./src
 
-# Build the application with cross-platform support
-RUN rustup target add aarch64-unknown-linux-gnu x86_64-unknown-linux-gnu
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc-aarch64-linux-gnu libc6-dev-arm64-cross
+# クロスプラットフォームサポートの設定
+# 環境変数ARGを使用して、ビルド時にターゲットアーキテクチャを指定可能に
+ARG TARGETARCH=x86_64
+ARG RUST_TARGET=x86_64-unknown-linux-gnu
 
-# Build for the current architecture
-RUN cargo build --release
+# アーキテクチャに応じたターゲットを設定
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+        RUST_TARGET=aarch64-unknown-linux-gnu; \
+        apt-get update && apt-get install -y --no-install-recommends \
+        gcc-aarch64-linux-gnu libc6-dev-arm64-cross; \
+        rustup target add aarch64-unknown-linux-gnu; \
+    else \
+        RUST_TARGET=x86_64-unknown-linux-gnu; \
+        rustup target add x86_64-unknown-linux-gnu; \
+    fi && \
+    # 現在のアーキテクチャ用にビルド
+    cargo build --release --target $RUST_TARGET
 
-# Create the runtime image
+# ランタイムステージ - 軽量なベースイメージを使用
 FROM debian:bookworm-slim
 
 WORKDIR /app
 
-# Install dependencies
+# 必要な依存関係のみをインストール
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     ca-certificates \
     libssl-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the binary from the builder
-COPY --from=builder /app/target/release/hyperflux /app/hyperflux
+# データディレクトリを作成
+RUN mkdir -p /app/data && chmod 777 /app/data
 
-# Make sure the binary is executable
+# ビルダーステージからバイナリをコピー
+COPY --from=builder /app/target/*/release/hyperflux /app/hyperflux
+
+# バイナリが実行可能であることを確認
 RUN chmod +x /app/hyperflux
 
-# Expose the API port
+# APIポートを公開
 EXPOSE 54867
 
-# Run the application
+# ヘルスチェック設定
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:54867/info || exit 1
+
+# 環境変数の設定
+ENV RUST_LOG=info
+ENV DATA_DIR=/app/data
+
+# アプリケーションを実行
 CMD ["/app/hyperflux"]

@@ -9,7 +9,7 @@ services:
       - "54868:54867"
     expose:
       - "54867"
-    platform: linux/amd64
+    # プラットフォーム指定を削除して自動検出に任せる
     environment:
       - RUST_LOG=info
     restart: unless-stopped
@@ -21,13 +21,20 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
+    volumes:
+      # データの永続化
+      - hyperflux-data:/app/data
+    # リソース制限を追加
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
 
   web:
-    image: node:18-alpine
-    working_dir: /app
-    volumes:
-      - ./web:/app
-    command: sh -c "npm install --no-fund --no-audit --loglevel=error && node server.js"
+    build:
+      context: ./web
+      dockerfile: Dockerfile
     ports:
       - "54867:54867"
     expose:
@@ -39,6 +46,17 @@ services:
       - NODE_URL=http://node:54867
     networks:
       - hyperflux-network
+    restart: unless-stopped
+    # リソース制限を追加
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
+volumes:
+  hyperflux-data:
+    driver: local
 
 networks:
   hyperflux-network:

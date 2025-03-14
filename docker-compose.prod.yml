@@ -1,0 +1,104 @@
+version: '3'
+
+services:
+  node:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # 本番環境用のビルド引数
+        TARGETARCH: ${TARGETARCH:-x86_64}
+    ports:
+      - "54868:54867"
+    expose:
+      - "54867"
+    environment:
+      - RUST_LOG=info
+      - NODE_ENV=production
+    restart: always
+    networks:
+      - hyperflux-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:54867/info"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    volumes:
+      - hyperflux-data:/app/data
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "54867:54867"
+    expose:
+      - "54867"
+    depends_on:
+      node:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - NODE_URL=http://node:54867
+    networks:
+      - hyperflux-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  # 本番環境用のロードバランサー
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - web
+    networks:
+      - hyperflux-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+
+volumes:
+  hyperflux-data:
+    driver: local
+
+networks:
+  hyperflux-network:
+    driver: bridge
