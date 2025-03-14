@@ -118,29 +118,95 @@ echo -e "${YELLOW}Dockerデーモンをチェックしています...${NC}"
 if ! docker info &> /dev/null; then
     echo -e "${RED}Dockerデーモンが実行されていません。${NC}"
     
-    case $OS in
-        linux)
-            echo -e "${YELLOW}Dockerデーモンを起動しますか？ (y/n)${NC}"
-            read -r start_docker
-            if [[ "$start_docker" == "y" ]]; then
-                echo -e "${YELLOW}Dockerデーモンを起動しています...${NC}"
-                sudo systemctl start docker || sudo service docker start || sudo dockerd > /dev/null 2>&1 &
-                sleep 5
-                if ! docker info &> /dev/null; then
-                    echo -e "${RED}Dockerデーモンの起動に失敗しました。手動で起動してください。${NC}"
+    # 非インタラクティブモードでは自動的に起動を試みる
+    if [ "$INTERACTIVE" = false ]; then
+        echo "非インタラクティブモードでは自動的にDockerデーモンの起動を試みます..."
+        
+        # 各種方法でDockerデーモンの起動を試みる
+        (sudo systemctl start docker 2>/dev/null || 
+         sudo service docker start 2>/dev/null || 
+         (sudo dockerd > /tmp/docker.log 2>&1 &)) && sleep 5
+        
+        # 起動確認
+        if ! docker info &> /dev/null; then
+            echo "Dockerデーモンの起動に失敗しました。"
+            echo "以下のコマンドを手動で実行してください："
+            echo "  sudo systemctl start docker"
+            echo "  または"
+            echo "  sudo service docker start"
+            echo "  または"
+            echo "  sudo dockerd > /tmp/docker.log 2>&1 &"
+            exit 1
+        else
+            echo "Dockerデーモンが正常に起動しました。"
+        fi
+    else
+        case $OS in
+            linux)
+                echo -e "${YELLOW}Dockerデーモンを起動しますか？ (y/n)${NC}"
+                read -r start_docker
+                if [[ "$start_docker" == "y" ]]; then
+                    echo -e "${YELLOW}Dockerデーモンを起動しています...${NC}"
+                    
+                    # 各種方法でDockerデーモンの起動を試みる
+                    if sudo systemctl start docker 2>/dev/null; then
+                        echo -e "${GREEN}systemctlでDockerデーモンを起動しました。${NC}"
+                    elif sudo service docker start 2>/dev/null; then
+                        echo -e "${GREEN}serviceコマンドでDockerデーモンを起動しました。${NC}"
+                    else
+                        echo -e "${YELLOW}直接dockerdを起動します...${NC}"
+                        sudo dockerd > /tmp/docker.log 2>&1 &
+                    fi
+                    
+                    # 起動を待機
+                    echo -e "${YELLOW}Dockerデーモンの起動を待機しています...${NC}"
+                    for i in {1..10}; do
+                        if docker info &> /dev/null; then
+                            echo -e "${GREEN}Dockerデーモンが正常に起動しました。${NC}"
+                            break
+                        fi
+                        
+                        if [ $i -eq 10 ]; then
+                            echo -e "${RED}Dockerデーモンの起動に失敗しました。手動で起動してください。${NC}"
+                            echo -e "${YELLOW}以下のコマンドを試してください:${NC}"
+                            echo -e "  ${GREEN}sudo systemctl start docker${NC}"
+                            echo -e "  ${GREEN}または${NC}"
+                            echo -e "  ${GREEN}sudo service docker start${NC}"
+                            echo -e "  ${GREEN}または${NC}"
+                            echo -e "  ${GREEN}sudo dockerd > /tmp/docker.log 2>&1 &${NC}"
+                            exit 1
+                        fi
+                        
+                        echo -e "${YELLOW}.${NC}"
+                        sleep 1
+                    done
+                else
+                    echo -e "${YELLOW}Dockerデーモンを手動で起動してください。${NC}"
+                    echo -e "${YELLOW}以下のコマンドを試してください:${NC}"
+                    echo -e "  ${GREEN}sudo systemctl start docker${NC}"
+                    echo -e "  ${GREEN}または${NC}"
+                    echo -e "  ${GREEN}sudo service docker start${NC}"
+                    echo -e "  ${GREEN}または${NC}"
+                    echo -e "  ${GREEN}sudo dockerd > /tmp/docker.log 2>&1 &${NC}"
                     exit 1
                 fi
-                echo -e "${GREEN}Dockerデーモンが起動しました。${NC}"
-            else
-                echo -e "${YELLOW}Dockerデーモンを手動で起動してください。${NC}"
+                ;;
+            macos)
+                echo -e "${YELLOW}macOSでは、Docker Desktopを起動してください。${NC}"
+                echo -e "${YELLOW}Docker Desktopが起動したら、このスクリプトを再度実行してください。${NC}"
                 exit 1
-            fi
-            ;;
-        *)
-            echo -e "${YELLOW}Dockerデーモンを手動で起動してください。${NC}"
-            exit 1
-            ;;
-    esac
+                ;;
+            windows)
+                echo -e "${YELLOW}WindowsではDocker Desktopを起動してください。${NC}"
+                echo -e "${YELLOW}Docker Desktopが起動したら、このスクリプトを再度実行してください。${NC}"
+                exit 1
+                ;;
+            *)
+                echo -e "${YELLOW}お使いのOSでDockerデーモンを手動で起動してください。${NC}"
+                exit 1
+                ;;
+        esac
+    fi
 fi
 
 # HyperFlux.ioのクローンまたは更新

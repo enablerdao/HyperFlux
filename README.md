@@ -148,7 +148,7 @@ cd HyperFlux
 - 🖥️ **Webインターフェース**: [http://localhost:54867](http://localhost:54867)
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/dashboard.png" alt="HyperFlux.io Dashboard" width="80%"/>
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/dashboard.svg" alt="HyperFlux.io Dashboard" width="80%"/>
 </div>
 
 ### 💻 コマンドラインインターフェース (CLI)
@@ -156,7 +156,7 @@ cd HyperFlux
 HyperFlux.ioはコマンドラインからの操作も可能です：
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/cli.png" alt="HyperFlux.io CLI" width="80%"/>
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/cli.svg" alt="HyperFlux.io CLI" width="80%"/>
 </div>
 
 ```bash
@@ -270,7 +270,7 @@ package.jsonに定義されたスクリプトを使用して、簡単に操作�
     </tr>
     <tr>
       <td>
-        <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/linux.png" width="20" alt="Linux" />
+        <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/linux.svg" width="20" alt="Linux" />
         Linux
       </td>
       <td>x86_64, ARM64</td>
@@ -278,7 +278,7 @@ package.jsonに定義されたスクリプトを使用して、簡単に操作�
     </tr>
     <tr>
       <td>
-        <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/macos.png" width="20" alt="macOS" />
+        <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/macos.svg" width="20" alt="macOS" />
         macOS
       </td>
       <td>Intel Chip, Apple Silicon (M1/M2/M3)</td>
@@ -286,7 +286,7 @@ package.jsonに定義されたスクリプトを使用して、簡単に操作�
     </tr>
     <tr>
       <td>
-        <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/windows.png" width="20" alt="Windows" />
+        <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/windows.svg" width="20" alt="Windows" />
         Windows
       </td>
       <td>x86_64 (WSL2経由)</td>
@@ -311,6 +311,27 @@ TARGETARCH=arm64 docker-compose build
 # 環境変数を設定してスクリプトを実行
 TARGETARCH=arm64 ./docker-start.sh -r
 ```
+
+</details>
+
+<details>
+<summary>🛠️ クロスプラットフォームビルドの仕組み</summary>
+
+HyperFlux.ioは、異なるアーキテクチャでのビルドを自動的に処理するための改良されたDockerfileを使用しています：
+
+1. **アーキテクチャの自動検出**：
+   - ホストマシンのアーキテクチャを自動的に検出
+   - `TARGETARCH`環境変数による手動指定も可能
+
+2. **適切なツールチェーンの設定**：
+   - ARM64向けビルド時に必要なクロスコンパイラを自動インストール
+   - 環境変数を適切に設定してクロスコンパイルをサポート
+
+3. **マルチアーキテクチャバイナリの生成**：
+   - x86_64とARM64の両方のバイナリを生成
+   - 実行時に適切なバイナリを自動選択
+
+これにより、Intel/AMD CPUを搭載したマシンでもApple Silicon（M1/M2/M3）やRaspberry Piなどの環境でも同じコマンドで簡単に実行できます。
 
 </details>
 
