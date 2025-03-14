@@ -82,7 +82,7 @@ pub struct SimpleValidator {
 
 #[async_trait]
 impl Validator for SimpleValidator {
-    async fn verify_signature(&self, signature: &[u8], payload: &[u8]) -> bool {
+    async fn verify_signature(&self, _signature: &[u8], _payload: &[u8]) -> bool {
         // 簡略化のため、常にtrueを返す
         // 実際の実装では、暗号署名の検証を行う
         true

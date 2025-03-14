@@ -13,7 +13,7 @@ pub enum TransactionStatus {
 }
 
 /// トランザクション構造体
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Transaction {
     /// トランザクションID
     pub id: String,
@@ -90,12 +90,15 @@ impl DAG {
             }
         }
         
+        // 親IDのリストを保存
+        let parent_ids = tx.parent_ids.clone();
+        
         // トランザクションを追加
         let tx_id = tx.id.clone();
         self.transactions.insert(tx_id.clone(), tx);
         
         // 親トランザクションの子として登録
-        for parent_id in &tx.parent_ids {
+        for parent_id in &parent_ids {
             self.children
                 .entry(parent_id.clone())
                 .or_insert_with(HashSet::new)

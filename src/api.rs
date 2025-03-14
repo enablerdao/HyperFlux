@@ -6,6 +6,7 @@ use std::convert::Infallible;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use warp::{Filter, Rejection, Reply};
+use base64;
 
 /// APIサーバー
 pub struct ApiServer {
