@@ -91,8 +91,19 @@ AIを活用してトランザクションの優先順位付けと予測を行い
 以下の1コマンドで、HyperFlux.ioのノードとWebインターフェースを起動できます：
 
 ```bash
-git clone https://github.com/enablerdao/HyperFlux.git && cd HyperFlux && docker-compose up --build
+curl -fsSL https://raw.githubusercontent.com/enablerdao/HyperFlux/main/install.sh | bash
 ```
+
+または、リポジトリをクローンして手動で実行することもできます：
+
+```bash
+git clone https://github.com/enablerdao/HyperFlux.git && cd HyperFlux && ./install.sh
+```
+
+インストールスクリプトは以下の機能を提供します：
+- OSとアーキテクチャの自動検出
+- Dockerとdocker-composeの自動チェックとインストール補助
+- 開発モード、バックグラウンドモード、本番モードの選択肢
 
 これにより、以下のサービスが起動します：
 - ノードサーバー: http://localhost:54868
