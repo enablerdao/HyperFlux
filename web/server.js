@@ -154,7 +154,7 @@ function handleRequest(req, res) {
       // ノードサーバーへのリクエスト
       const nodeReq = http.request({
         hostname: 'localhost',
-        port: 54867,
+        port: 54868,
         path: '/info',
         method: 'GET',
         timeout: 1000  // 1秒のタイムアウト
@@ -233,7 +233,7 @@ function handleRequest(req, res) {
           
           const nodeReq = http.request({
             hostname: 'localhost',
-            port: 54867,
+            port: 54868,
             path: '/transactions',
             method: 'POST',
             headers: {

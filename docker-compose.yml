@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "54867:54867"
+      - "54868:54867"
     environment:
       - RUST_LOG=info
     restart: unless-stopped

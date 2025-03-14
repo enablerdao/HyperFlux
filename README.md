@@ -90,7 +90,7 @@ git clone https://github.com/enablerdao/HyperFlux.git && cd HyperFlux && docker-
 ```
 
 これにより、以下のサービスが起動します：
-- ノードサーバー: http://localhost:54867
+- ノードサーバー: http://localhost:54868
 - Webインターフェース: http://localhost:57273
 
 ### 前提条件
