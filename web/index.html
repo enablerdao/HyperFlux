@@ -67,9 +67,28 @@
                         <a href="https://github.com/enablerdao/HyperFlux" target="_blank" class="btn btn-outline-light me-2">
                             <i class="bi bi-github"></i> GitHub
                         </a>
-                        <a href="https://github.com/enablerdao/HyperFlux/blob/main/README.md" target="_blank" class="btn btn-outline-light">
+                        <a href="https://github.com/enablerdao/HyperFlux/blob/main/README.md" target="_blank" class="btn btn-outline-light me-2">
                             <i class="bi bi-book"></i> ドキュメント
                         </a>
+                        <div class="dropdown d-inline-block">
+                            <button class="btn btn-outline-light dropdown-toggle" type="button" id="dataSourceDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-database"></i> データソース
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dataSourceDropdown">
+                                <li><a class="dropdown-item active" href="#" data-source="mock">モックデータ</a></li>
+                                <li><a class="dropdown-item" href="#" data-source="test">テストデータ</a></li>
+                                <li><a class="dropdown-item" href="#" data-source="live">実ノード接続</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="alert alert-info">
+                            <i class="bi bi-terminal"></i> 1コマンドでノードを起動:
+                            <code>git clone https://github.com/enablerdao/HyperFlux.git && cd HyperFlux && docker-compose up --build</code>
+                            <button class="btn btn-sm btn-outline-primary ms-2" onclick="copyToClipboard('git clone https://github.com/enablerdao/HyperFlux.git && cd HyperFlux && docker-compose up --build')">
+                                <i class="bi bi-clipboard"></i> コピー
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-4 text-end">
@@ -268,17 +287,72 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // ノード情報を取得する関数（Netlifyデモ用にモック）
+        // 現在のデータソース
+        let currentDataSource = 'mock';
+        
+        // APIエンドポイントの設定
+        const API_ENDPOINTS = {
+            mock: {
+                info: '/mock-info',
+                transactions: '/mock-transactions'
+            },
+            test: {
+                info: '/test-info',
+                transactions: '/test-transactions'
+            },
+            live: {
+                info: 'http://localhost:54867/info',
+                transactions: 'http://localhost:54867/transactions'
+            }
+        };
+        
+        // クリップボードにコピーする関数
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('コマンドをクリップボードにコピーしました！');
+            }).catch(err => {
+                console.error('クリップボードへのコピーに失敗しました:', err);
+            });
+        }
+        
+        // モックデータを生成する関数
+        function generateMockData() {
+            return {
+                id: 'node-' + Math.random().toString(36).substring(2, 10),
+                status: 'Running',
+                tps: Math.random() * 1000 + 500,
+                shard_count: 256,
+                confirmed_transactions: Math.floor(Math.random() * 10000)
+            };
+        }
+        
+        // テストデータを生成する関数
+        function generateTestData() {
+            return {
+                id: 'test-node-' + Math.random().toString(36).substring(2, 10),
+                status: 'Testing',
+                tps: Math.random() * 5000 + 10000, // テストデータは高いTPS
+                shard_count: 512, // テストデータは最大シャード数
+                confirmed_transactions: Math.floor(Math.random() * 100000 + 50000)
+            };
+        }
+        
+        // ノード情報を取得する関数
         async function fetchNodeInfo() {
             try {
-                // モックデータ
-                const data = {
-                    id: 'node-' + Math.random().toString(36).substring(2, 10),
-                    status: 'Running',
-                    tps: Math.random() * 1000 + 500,
-                    shard_count: 256,
-                    confirmed_transactions: Math.floor(Math.random() * 10000)
-                };
+                let data;
+                
+                if (currentDataSource === 'mock') {
+                    // モックデータ
+                    data = generateMockData();
+                } else if (currentDataSource === 'test') {
+                    // テストデータ
+                    data = generateTestData();
+                } else {
+                    // 実ノードからデータを取得
+                    const response = await fetch(API_ENDPOINTS[currentDataSource].info);
+                    data = await response.json();
+                }
                 
                 // UI更新
                 document.getElementById('node-id').textContent = data.id;
@@ -286,6 +360,16 @@
                 document.getElementById('current-tps').textContent = data.tps.toFixed(2);
                 document.getElementById('shard-count').textContent = data.shard_count;
                 document.getElementById('confirmed-tx').textContent = data.confirmed_transactions;
+                
+                // ステータスに応じてバッジの色を変更
+                const statusBadge = document.getElementById('node-status');
+                if (data.status === 'Running') {
+                    statusBadge.className = 'badge bg-success';
+                } else if (data.status === 'Testing') {
+                    statusBadge.className = 'badge bg-warning';
+                } else {
+                    statusBadge.className = 'badge bg-info';
+                }
                 
                 // チャートデータ更新
                 addDataToChart(tpsChart, new Date().toLocaleTimeString(), data.tps);
@@ -298,18 +382,49 @@
             }
         }
         
-        // トランザクションを作成する関数（Netlifyデモ用にモック）
+        // トランザクションを作成する関数
         async function createTransaction(parentIds, payload, signature) {
             try {
-                // モックデータ
-                const data = {
-                    id: Math.random().toString(36).substring(2, 10) + '-' + Date.now(),
-                    status: 'success'
-                };
+                let data;
                 
-                // 成功時の処理
-                addTransactionToUI(data.id, payload, new Date().toISOString());
-                return data;
+                if (currentDataSource === 'mock') {
+                    // モックデータ
+                    data = {
+                        id: Math.random().toString(36).substring(2, 10) + '-' + Date.now(),
+                        status: 'success'
+                    };
+                } else if (currentDataSource === 'test') {
+                    // テストデータ
+                    data = {
+                        id: 'test-tx-' + Math.random().toString(36).substring(2, 15) + '-' + Date.now(),
+                        status: 'success'
+                    };
+                } else {
+                    // 実ノードにトランザクションを送信
+                    const response = await fetch(API_ENDPOINTS[currentDataSource].transactions, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            parent_ids: parentIds,
+                            payload: btoa(payload), // Base64エンコード
+                            signature: btoa(signature), // Base64エンコード
+                        }),
+                    });
+                    
+                    data = await response.json();
+                }
+                
+                if (data.status === 'success') {
+                    // 成功時の処理
+                    addTransactionToUI(data.id, payload, new Date().toISOString());
+                    return data;
+                } else {
+                    // エラー時の処理
+                    alert(`トランザクション作成エラー: ${data.status}`);
+                    return null;
+                }
             } catch (error) {
                 console.error('Error creating transaction:', error);
                 alert('トランザクション作成中にエラーが発生しました。');
@@ -416,6 +531,52 @@
             
             // トランザクション作成
             await createTransaction(parentIds, payload, signature);
+        });
+        
+        // データソース切り替えのイベントリスナーを設定
+        document.querySelectorAll('.dropdown-item[data-source]').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // 現在のアクティブなアイテムを非アクティブにする
+                document.querySelector('.dropdown-item.active').classList.remove('active');
+                
+                // クリックされたアイテムをアクティブにする
+                this.classList.add('active');
+                
+                // データソースを更新
+                currentDataSource = this.getAttribute('data-source');
+                
+                // データを再取得
+                fetchNodeInfo();
+                
+                // データソースに応じてメッセージを表示
+                let message = '';
+                if (currentDataSource === 'mock') {
+                    message = 'モックデータモードに切り替えました。ランダムなデータが表示されます。';
+                } else if (currentDataSource === 'test') {
+                    message = 'テストデータモードに切り替えました。高負荷テスト用のデータが表示されます。';
+                } else {
+                    message = '実ノード接続モードに切り替えました。ローカルで実行中のノードに接続します。';
+                }
+                
+                // アラートを表示
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-info alert-dismissible fade show';
+                alertDiv.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                
+                // 既存のアラートを削除
+                const existingAlert = document.querySelector('.alert-dismissible');
+                if (existingAlert) {
+                    existingAlert.remove();
+                }
+                
+                // アラートを追加
+                document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.container').firstChild);
+            });
         });
         
         // 初期データ取得

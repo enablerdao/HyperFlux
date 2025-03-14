@@ -79,19 +79,103 @@ AIを活用してトランザクションの優先順位付けと予測を行い
    - トランザクションの作成と監視
    - 実装: `web/index.html`と`web/server.js`
 
-## 実装ガイド
+## クイックスタート
 
-### 環境構築
+### 1コマンドでの起動（すべてのOS対応）
+
+以下の1コマンドで、HyperFlux.ioのノードとWebインターフェースを起動できます：
+
+```bash
+git clone https://github.com/enablerdao/HyperFlux.git && cd HyperFlux && docker-compose up --build
+```
+
+これにより、以下のサービスが起動します：
+- ノードサーバー: http://localhost:54867
+- Webインターフェース: http://localhost:57273
+
+### 前提条件
+- Git
+- Docker と Docker Compose
+
+## 詳細な実装ガイド
+
+### 各OSでの環境構築
+
+#### Linux (Ubuntu/Debian)
+
+1. **Dockerのインストール**
+```bash
+# 前提パッケージのインストール
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
+
+# Dockerの公式GPGキーを追加
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+# リポジトリを設定
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Dockerをインストール
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+# Docker Composeをインストール
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.18.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+# ユーザーをdockerグループに追加（sudo不要でDockerを実行可能に）
+sudo usermod -aG docker $USER
+```
+
+2. **プロジェクトのクローンと起動**
+```bash
+git clone https://github.com/enablerdao/HyperFlux.git
+cd HyperFlux
+docker-compose up --build
+```
+
+#### macOS
+
+1. **Dockerのインストール**
+   - [Docker Desktop for Mac](https://www.docker.com/products/docker-desktop)をダウンロードしてインストール
+   - または、Homebrewを使用してインストール:
+   ```bash
+   brew install --cask docker
+   ```
+
+2. **プロジェクトのクローンと起動**
+```bash
+git clone https://github.com/enablerdao/HyperFlux.git
+cd HyperFlux
+docker-compose up --build
+```
+
+#### Windows
+
+1. **Dockerのインストール**
+   - [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop)をダウンロードしてインストール
+   - WSL2が有効になっていることを確認（Windows 10/11）
+
+2. **プロジェクトのクローンと起動**
+```bash
+git clone https://github.com/enablerdao/HyperFlux.git
+cd HyperFlux
+docker-compose up --build
+```
+
+### Docker不要の開発環境構築
+
+Docker環境を使用せずに開発する場合は、以下の手順で環境を構築できます：
 
 #### 前提条件
 - Rust (1.75以上)
 - Node.js (v14以上)
-- Docker と Docker Compose
 
 #### Rustのインストール
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-source "$HOME/.cargo/env"
+source "$HOME/.cargo/env"  # Linux/macOS
+# Windowsの場合は、インストーラーの指示に従ってください
 ```
 
 #### Node.jsのインストール
@@ -102,9 +186,12 @@ sudo apt-get install -y nodejs
 
 # macOSの場合
 brew install node
+
+# Windowsの場合
+# https://nodejs.org/からインストーラーをダウンロードしてインストール
 ```
 
-### プロジェクトのクローンと構築
+#### プロジェクトのクローンと構築
 
 ```bash
 # リポジトリのクローン
@@ -120,19 +207,23 @@ npm install
 cd ..
 ```
 
-### 開発モードでの実行
+#### 開発モードでの実行
 
 ```bash
 # 開発モードでノードとWebサーバーを起動
-./run_dev.sh
+./run_dev.sh  # Linux/macOS
+# Windowsの場合は、run_dev.batを実行
 ```
 
-### Dockerでの実行
+### データソースの切り替え
 
-```bash
-# Dockerイメージをビルドして起動
-docker-compose up --build
-```
+Webインターフェースでは、以下の3つのデータソースを切り替えることができます：
+
+1. **モックデータ**: ランダムに生成されたデータを表示（デフォルト）
+2. **テストデータ**: 高負荷テスト用の大きな値を持つデータを表示
+3. **実ノード接続**: ローカルで実行中のノードに接続してリアルデータを表示
+
+データソースは、Webインターフェース上部の「データソース」ドロップダウンメニューから切り替えることができます。
 
 ### 主要コンポーネントの実装詳細
 
