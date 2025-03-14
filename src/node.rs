@@ -11,9 +11,13 @@ use uuid::Uuid;
 /// ノードの設定
 pub struct NodeConfig {
     /// ノードID
-    pub id: String,
+    pub node_id: String,
+    /// APIポート
+    pub port: u16,
+    /// データディレクトリ
+    pub data_dir: String,
     /// 初期シャード数
-    pub initial_shards: u32,
+    pub shard_count: u32,
     /// 負荷閾値
     pub load_threshold: u32,
     /// バリデータの数
@@ -23,8 +27,10 @@ pub struct NodeConfig {
 impl Default for NodeConfig {
     fn default() -> Self {
         Self {
-            id: Uuid::new_v4().to_string(),
-            initial_shards: 256,
+            node_id: Uuid::new_v4().to_string(),
+            port: 54868,
+            data_dir: "./data".to_string(),
+            shard_count: 256,
             load_threshold: 10000,
             validator_count: 4,
         }
@@ -79,7 +85,7 @@ impl Node {
         
         // シャーディングマネージャーを作成
         let sharding_manager = Arc::new(ShardingManager::new(
-            config.initial_shards,
+            config.shard_count,
             config.load_threshold,
         ));
         
@@ -93,7 +99,7 @@ impl Node {
         let (tx_sender, tx_receiver) = mpsc::channel(1000);
         
         Self {
-            id: config.id,
+            id: config.node_id,
             status: NodeStatus::Stopped,
             dag,
             consensus,

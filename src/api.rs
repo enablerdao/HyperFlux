@@ -75,7 +75,7 @@ impl ApiServer {
     }
     
     /// サーバーを起動
-    pub async fn start(&self) {
+    pub async fn start(&self) -> Result<(), String> {
         info!("Starting API server on port {}", self.port);
         
         // 各マネージャーの参照をクローン
@@ -179,6 +179,8 @@ impl ApiServer {
         warp::serve(routes)
             .run(([0, 0, 0, 0], self.port))
             .await;
+            
+        Ok(())
     }
 }
 
