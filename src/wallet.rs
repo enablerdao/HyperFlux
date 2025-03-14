@@ -174,7 +174,7 @@ impl WalletManager {
         if let Some(token_id) = &tx_data.token_id {
             // トークン送金の場合
             // 送信元アカウントのトークン残高を確認
-            let from_balance = {
+            {
                 let from_account = accounts.get(&tx_data.from).unwrap();
                 let balance = from_account.token_balances.get(token_id).unwrap_or(&0.0);
                 if *balance < tx_data.amount {
@@ -201,7 +201,7 @@ impl WalletManager {
         } else {
             // 通常の送金の場合
             // 送信元アカウントの残高を確認
-            let from_balance = {
+            {
                 let from_account = accounts.get(&tx_data.from).unwrap();
                 if from_account.balance < tx_data.amount {
                     return Err(format!("Insufficient balance: {} < {}", from_account.balance, tx_data.amount));

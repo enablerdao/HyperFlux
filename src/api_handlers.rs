@@ -8,6 +8,7 @@ use std::convert::Infallible;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use warp::{Rejection, Reply};
+use warp::reply::Response;
 
 // ウォレットAPI用の構造体
 
@@ -197,7 +198,7 @@ pub struct TradeHistoryResponse {
 pub async fn handle_create_account(
     req: CreateAccountRequest,
     wallet_manager: Arc<WalletManager>,
-) -> Result<impl Reply, Rejection> {
+) -> Result<Response, Rejection> {
     match wallet_manager.create_account(req.name) {
         Ok(account) => {
             let response = CreateAccountResponse {
@@ -207,7 +208,7 @@ pub async fn handle_create_account(
                 balance: account.balance,
                 created_at: account.created_at.to_rfc3339(),
             };
-            Ok(warp::reply::json(&response))
+            Ok(warp::reply::json(&response).into_response())
         }
         Err(e) => {
             error!("Failed to create account: {}", e);
@@ -217,7 +218,7 @@ pub async fn handle_create_account(
             Ok(warp::reply::with_status(
                 warp::reply::json(&json_response),
                 warp::http::StatusCode::BAD_REQUEST,
-            ))
+            ).into_response())
         }
     }
 }
@@ -226,7 +227,7 @@ pub async fn handle_create_account(
 pub async fn handle_get_account(
     account_id: String,
     wallet_manager: Arc<WalletManager>,
-) -> Result<impl Reply, Rejection> {
+) -> Result<Response, Rejection> {
     match wallet_manager.get_account(&account_id) {
         Some(account) => {
             let response = serde_json::json!({
@@ -237,7 +238,7 @@ pub async fn handle_get_account(
                 "token_balances": account.token_balances,
                 "created_at": account.created_at.to_rfc3339(),
             });
-            Ok(warp::reply::json(&response))
+            Ok(warp::reply::json(&response).into_response())
         }
         None => {
             let json_response = serde_json::json!({
@@ -246,7 +247,7 @@ pub async fn handle_get_account(
             Ok(warp::reply::with_status(
                 warp::reply::json(&json_response),
                 warp::http::StatusCode::NOT_FOUND,
-            ))
+            ).into_response())
         }
     }
 }
@@ -256,7 +257,7 @@ pub async fn handle_transfer(
     req: TransferRequest,
     wallet_manager: Arc<WalletManager>,
     node: Arc<Mutex<Node>>,
-) -> Result<impl Reply, Rejection> {
+) -> Result<Response, Rejection> {
     // トランザクションを作成
     match wallet_manager.create_transaction(
         &req.from_account_id,
@@ -274,7 +275,7 @@ pub async fn handle_transfer(
                         transaction_id: tx.id,
                         status: "success".to_string(),
                     };
-                    Ok(warp::reply::json(&response))
+                    Ok(warp::reply::json(&response).into_response())
                 }
                 Err(e) => {
                     error!("Failed to add transaction: {}", e);
@@ -284,7 +285,7 @@ pub async fn handle_transfer(
                     Ok(warp::reply::with_status(
                         warp::reply::json(&json_response),
                         warp::http::StatusCode::INTERNAL_SERVER_ERROR,
-                    ))
+                    ).into_response())
                 }
             }
         }
@@ -296,7 +297,7 @@ pub async fn handle_transfer(
             Ok(warp::reply::with_status(
                 warp::reply::json(&json_response),
                 warp::http::StatusCode::BAD_REQUEST,
-            ))
+            ).into_response())
         }
     }
 }
@@ -307,20 +308,20 @@ pub async fn handle_transfer(
 pub async fn handle_add_trading_pair(
     req: AddTradingPairRequest,
     dex_manager: Arc<DexManager>,
-) -> Result<impl Reply, Rejection> {
+) -> Result<Response, Rejection> {
     let pair = dex_manager.add_trading_pair(req.base, req.quote);
     let response = AddTradingPairResponse {
         pair: pair.to_string(),
         status: "success".to_string(),
     };
-    Ok(warp::reply::json(&response))
+    Ok(warp::reply::json(&response).into_response())
 }
 
 /// 注文作成ハンドラー
 pub async fn handle_create_order(
     req: CreateOrderRequest,
     dex_manager: Arc<DexManager>,
-) -> Result<impl Reply, Rejection> {
+) -> Result<Response, Rejection> {
     // 注文タイプを変換
     let order_type = match req.order_type.to_lowercase().as_str() {
         "buy" => OrderType::Buy,
@@ -332,7 +333,7 @@ pub async fn handle_create_order(
             return Ok(warp::reply::with_status(
                 warp::reply::json(&json_response),
                 warp::http::StatusCode::BAD_REQUEST,
-            ));
+            ).into_response());
         }
     };
     
@@ -365,7 +366,7 @@ pub async fn handle_create_order(
                 status: format!("{:?}", order.status),
                 trades: trade_infos,
             };
-            Ok(warp::reply::json(&response))
+            Ok(warp::reply::json(&response).into_response())
         }
         Err(e) => {
             error!("Failed to create order: {}", e);
@@ -375,7 +376,7 @@ pub async fn handle_create_order(
             Ok(warp::reply::with_status(
                 warp::reply::json(&json_response),
                 warp::http::StatusCode::BAD_REQUEST,
-            ))
+            ).into_response())
         }
     }
 }
@@ -385,14 +386,14 @@ pub async fn handle_cancel_order(
     order_id: String,
     query: CancelOrderQuery,
     dex_manager: Arc<DexManager>,
-) -> Result<impl Reply, Rejection> {
+) -> Result<Response, Rejection> {
     match dex_manager.cancel_order(&query.account_id, &order_id) {
         Ok(_) => {
             let response = CancelOrderResponse {
                 order_id,
                 status: "canceled".to_string(),
             };
-            Ok(warp::reply::json(&response))
+            Ok(warp::reply::json(&response).into_response())
         }
         Err(e) => {
             error!("Failed to cancel order: {}", e);
@@ -402,7 +403,7 @@ pub async fn handle_cancel_order(
             Ok(warp::reply::with_status(
                 warp::reply::json(&json_response),
                 warp::http::StatusCode::BAD_REQUEST,
-            ))
+            ).into_response())
         }
     }
 }
@@ -411,7 +412,7 @@ pub async fn handle_cancel_order(
 pub async fn handle_get_order_book(
     query: OrderBookQuery,
     dex_manager: Arc<DexManager>,
-) -> Result<impl Reply, Rejection> {
+) -> Result<Response, Rejection> {
     let pair = TradingPair::new(query.base, query.quote);
     
     match dex_manager.get_order_book(&pair) {
@@ -435,7 +436,7 @@ pub async fn handle_get_order_book(
                 bids: bid_infos,
                 asks: ask_infos,
             };
-            Ok(warp::reply::json(&response))
+            Ok(warp::reply::json(&response).into_response())
         }
         Err(e) => {
             error!("Failed to get order book: {}", e);
@@ -445,7 +446,7 @@ pub async fn handle_get_order_book(
             Ok(warp::reply::with_status(
                 warp::reply::json(&json_response),
                 warp::http::StatusCode::BAD_REQUEST,
-            ))
+            ).into_response())
         }
     }
 }
@@ -454,7 +455,7 @@ pub async fn handle_get_order_book(
 pub async fn handle_get_trade_history(
     query: TradeHistoryQuery,
     dex_manager: Arc<DexManager>,
-) -> Result<impl Reply, Rejection> {
+) -> Result<Response, Rejection> {
     let pair = TradingPair::new(query.base, query.quote);
     let limit = query.limit.unwrap_or(100);
     
@@ -475,7 +476,7 @@ pub async fn handle_get_trade_history(
                 pair: pair.to_string(),
                 trades: trade_infos,
             };
-            Ok(warp::reply::json(&response))
+            Ok(warp::reply::json(&response).into_response())
         }
         Err(e) => {
             error!("Failed to get trade history: {}", e);
@@ -485,7 +486,7 @@ pub async fn handle_get_trade_history(
             Ok(warp::reply::with_status(
                 warp::reply::json(&json_response),
                 warp::http::StatusCode::BAD_REQUEST,
-            ))
+            ).into_response())
         }
     }
 }
