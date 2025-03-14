@@ -96,10 +96,19 @@ const server = http.createServer((req, res) => {
       return;
     }
     
-    // テストデータのエンドポイント
+    // テストデータのエンドポイント - 実際のノードデータをシミュレート
     if (req.url === '/test-info') {
+      // 実際のノードデータを模倣した固定テストデータ
+      const testData = {
+        id: 'test-node-' + Math.floor(Math.random() * 1000).toString().padStart(3, '0'),
+        status: 'Testing',
+        tps: 45678.92,  // 高いTPS値
+        shard_count: 512,  // 最大シャード数
+        confirmed_transactions: 987654  // 多数のトランザクション
+      };
+      
       res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify(generateTestData()));
+      res.end(JSON.stringify(testData));
       return;
     }
     
@@ -112,14 +121,26 @@ const server = http.createServer((req, res) => {
       req.on('end', () => {
         try {
           const data = JSON.parse(body);
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({
-            id: 'test-tx-' + Math.random().toString(36).substring(2, 15) + '-' + Date.now(),
-            status: 'success'
-          }));
+          
+          // 実際のトランザクション処理をシミュレート
+          // 実際のノードでは、ここでトランザクションの検証と処理が行われる
+          const txId = 'test-tx-' + Date.now().toString(16) + '-' + Math.floor(Math.random() * 1000000).toString(16);
+          
+          // 処理時間をシミュレート
+          setTimeout(() => {
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({
+              id: txId,
+              status: 'success',
+              timestamp: Date.now(),
+              shard: Math.floor(Math.random() * 512),
+              confirmation_time: Math.random() * 0.5  // 0.5秒以内の確認時間
+            }));
+          }, 100);  // 100msの処理時間
+          
         } catch (e) {
           res.statusCode = 400;
-          res.end(JSON.stringify({ error: 'Invalid JSON' }));
+          res.end(JSON.stringify({ error: 'Invalid JSON', details: e.message }));
         }
       });
       return;
@@ -127,8 +148,73 @@ const server = http.createServer((req, res) => {
     
     // 実ノードのエンドポイント（プロキシとして機能）
     if (req.url === '/info') {
-      res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify(generateMockData())); // 実際にはノードに接続するが、ここではモックデータを返す
+      // 実際のノードに接続を試みる
+      const http = require('http');
+      
+      // ノードサーバーへのリクエスト
+      const nodeReq = http.request({
+        hostname: 'localhost',
+        port: 54867,
+        path: '/info',
+        method: 'GET',
+        timeout: 1000  // 1秒のタイムアウト
+      }, (nodeRes) => {
+        let data = '';
+        
+        nodeRes.on('data', (chunk) => {
+          data += chunk;
+        });
+        
+        nodeRes.on('end', () => {
+          try {
+            // ノードからのレスポンスをそのまま返す
+            res.setHeader('Content-Type', 'application/json');
+            res.end(data);
+          } catch (e) {
+            // JSONパースエラーなどの場合はフォールバック
+            console.error('Error parsing node response:', e);
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({
+              id: 'node-' + Math.random().toString(36).substring(2, 10),
+              status: 'Error',
+              tps: 0,
+              shard_count: 256,
+              confirmed_transactions: 0,
+              error: 'Failed to parse node response'
+            }));
+          }
+        });
+      });
+      
+      nodeReq.on('error', (e) => {
+        console.error('Error connecting to node:', e);
+        // ノード接続エラーの場合はエラーステータスを返す
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({
+          id: 'node-offline',
+          status: 'Offline',
+          tps: 0,
+          shard_count: 256,
+          confirmed_transactions: 0,
+          error: e.message
+        }));
+      });
+      
+      nodeReq.on('timeout', () => {
+        nodeReq.destroy();
+        // タイムアウトの場合もエラーステータスを返す
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({
+          id: 'node-timeout',
+          status: 'Timeout',
+          tps: 0,
+          shard_count: 256,
+          confirmed_transactions: 0,
+          error: 'Connection timeout'
+        }));
+      });
+      
+      nodeReq.end();
       return;
     }
     
@@ -141,14 +227,73 @@ const server = http.createServer((req, res) => {
       req.on('end', () => {
         try {
           const data = JSON.parse(body);
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({
-            id: Math.random().toString(36).substring(2, 10) + '-' + Date.now(),
-            status: 'success'
-          }));
+          
+          // 実際のノードに接続を試みる
+          const http = require('http');
+          
+          const nodeReq = http.request({
+            hostname: 'localhost',
+            port: 54867,
+            path: '/transactions',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            timeout: 2000  // 2秒のタイムアウト
+          }, (nodeRes) => {
+            let responseData = '';
+            
+            nodeRes.on('data', (chunk) => {
+              responseData += chunk;
+            });
+            
+            nodeRes.on('end', () => {
+              try {
+                // ノードからのレスポンスをそのまま返す
+                res.setHeader('Content-Type', 'application/json');
+                res.end(responseData);
+              } catch (e) {
+                // JSONパースエラーなどの場合はフォールバック
+                console.error('Error parsing node response:', e);
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({
+                  id: 'error-' + Date.now(),
+                  status: 'error',
+                  error: 'Failed to parse node response'
+                }));
+              }
+            });
+          });
+          
+          nodeReq.on('error', (e) => {
+            console.error('Error connecting to node:', e);
+            // ノード接続エラーの場合はエラーステータスを返す
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({
+              id: 'error-' + Date.now(),
+              status: 'error',
+              error: e.message
+            }));
+          });
+          
+          nodeReq.on('timeout', () => {
+            nodeReq.destroy();
+            // タイムアウトの場合もエラーステータスを返す
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({
+              id: 'error-' + Date.now(),
+              status: 'error',
+              error: 'Connection timeout'
+            }));
+          });
+          
+          // リクエストボディを送信
+          nodeReq.write(JSON.stringify(data));
+          nodeReq.end();
+          
         } catch (e) {
           res.statusCode = 400;
-          res.end(JSON.stringify({ error: 'Invalid JSON' }));
+          res.end(JSON.stringify({ error: 'Invalid JSON', details: e.message }));
         }
       });
       return;

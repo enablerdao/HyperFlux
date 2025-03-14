@@ -326,32 +326,38 @@
             };
         }
         
-        // テストデータを生成する関数
-        function generateTestData() {
-            return {
-                id: 'test-node-' + Math.random().toString(36).substring(2, 10),
-                status: 'Testing',
-                tps: Math.random() * 5000 + 10000, // テストデータは高いTPS
-                shard_count: 512, // テストデータは最大シャード数
-                confirmed_transactions: Math.floor(Math.random() * 100000 + 50000)
-            };
-        }
+        // テストデータは実際のAPIから取得するため、この関数は不要になりました
         
         // ノード情報を取得する関数
         async function fetchNodeInfo() {
             try {
                 let data;
                 
-                if (currentDataSource === 'mock') {
-                    // モックデータ
-                    data = generateMockData();
-                } else if (currentDataSource === 'test') {
-                    // テストデータ
-                    data = generateTestData();
-                } else {
-                    // 実ノードからデータを取得
+                // データソースに応じてAPIエンドポイントからデータを取得
+                try {
                     const response = await fetch(API_ENDPOINTS[currentDataSource].info);
                     data = await response.json();
+                    
+                    // エラーステータスの場合
+                    if (data.error) {
+                        console.warn('API returned error:', data.error);
+                    }
+                } catch (fetchError) {
+                    console.error('Error fetching from API:', fetchError);
+                    
+                    // APIリクエストが失敗した場合はフォールバック
+                    if (currentDataSource === 'mock') {
+                        data = generateMockData();
+                    } else {
+                        data = {
+                            id: currentDataSource + '-error',
+                            status: 'Error',
+                            tps: 0,
+                            shard_count: 0,
+                            confirmed_transactions: 0,
+                            error: fetchError.message
+                        };
+                    }
                 }
                 
                 // UI更新
@@ -387,20 +393,8 @@
             try {
                 let data;
                 
-                if (currentDataSource === 'mock') {
-                    // モックデータ
-                    data = {
-                        id: Math.random().toString(36).substring(2, 10) + '-' + Date.now(),
-                        status: 'success'
-                    };
-                } else if (currentDataSource === 'test') {
-                    // テストデータ
-                    data = {
-                        id: 'test-tx-' + Math.random().toString(36).substring(2, 15) + '-' + Date.now(),
-                        status: 'success'
-                    };
-                } else {
-                    // 実ノードにトランザクションを送信
+                try {
+                    // APIエンドポイントにトランザクションを送信
                     const response = await fetch(API_ENDPOINTS[currentDataSource].transactions, {
                         method: 'POST',
                         headers: {
@@ -414,6 +408,16 @@
                     });
                     
                     data = await response.json();
+                    
+                    // エラーステータスの場合
+                    if (data.error) {
+                        console.warn('Transaction API returned error:', data.error);
+                    }
+                } catch (fetchError) {
+                    console.error('Error sending transaction:', fetchError);
+                    
+                    // APIリクエストが失敗した場合はエラーを返す
+                    throw new Error(`トランザクション送信エラー: ${fetchError.message}`);
                 }
                 
                 if (data.status === 'success') {
