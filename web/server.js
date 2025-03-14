@@ -18,305 +18,89 @@ const MIME_TYPES = {
 
 // リクエストハンドラ関数（テスト可能にするために分離）
 function handleRequest(req, res) {
-  console.log(`${req.method} ${req.url}`);
-  
-  // CORSヘッダーを設定する関数
-  function setCorsHeaders(res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  // CORSヘッダーを設定
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // OPTIONSリクエストに対応
+  if (req.method === 'OPTIONS') {
+    res.writeHead(200);
+    res.end();
+    return;
   }
+
+  // URLからパスを取得
+  let filePath = req.url;
   
-  // モックデータを生成する関数
-  function generateMockData() {
-    return {
-      id: 'node-' + Math.random().toString(36).substring(2, 10),
-      status: 'Running',
-      tps: Math.random() * 1000 + 500,
-      shard_count: 256,
-      confirmed_transactions: Math.floor(Math.random() * 10000)
-    };
-  }
-  
-  // テストデータを生成する関数
-  function generateTestData() {
-    return {
-      id: 'test-node-' + Math.random().toString(36).substring(2, 10),
-      status: 'Testing',
-      tps: Math.random() * 5000 + 10000, // テストデータは高いTPS
-      shard_count: 512, // テストデータは最大シャード数
-      confirmed_transactions: Math.floor(Math.random() * 100000 + 50000)
-    };
-  }
-  
-  // APIリクエストを処理
-  if (req.url.startsWith('/info') || 
-      req.url.startsWith('/transactions') || 
-      req.url.startsWith('/mock-info') || 
-      req.url.startsWith('/mock-transactions') || 
-      req.url.startsWith('/test-info') || 
-      req.url.startsWith('/test-transactions')) {
+  // APIリクエストをノードサーバーにプロキシ
+  if (filePath.startsWith('/api/')) {
+    // ノードサーバーのURLを構築
+    const nodeUrl = `http://localhost:54868${filePath}`;
     
-    // CORSヘッダーを設定
-    setCorsHeaders(res);
-    
-    // OPTIONSリクエストに対応
-    if (req.method === 'OPTIONS') {
-      res.statusCode = 204;
-      res.end();
-      return;
-    }
-    
-    // モックデータのエンドポイント
-    if (req.url === '/mock-info') {
-      res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify(generateMockData()));
-      return;
-    }
-    
-    if (req.url === '/mock-transactions' && req.method === 'POST') {
-      let body = '';
-      req.on('data', chunk => {
-        body += chunk.toString();
-      });
-      
-      req.on('end', () => {
-        try {
-          const data = JSON.parse(body);
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({
-            id: Math.random().toString(36).substring(2, 10) + '-' + Date.now(),
-            status: 'success'
-          }));
-        } catch (e) {
-          res.statusCode = 400;
-          res.end(JSON.stringify({ error: 'Invalid JSON' }));
-        }
-      });
-      return;
-    }
-    
-    // テストデータのエンドポイント - 実際のノードデータをシミュレート
-    if (req.url === '/test-info') {
-      // 実際のノードデータを模倣した固定テストデータ
-      const testData = {
-        id: 'test-node-' + Math.floor(Math.random() * 1000).toString().padStart(3, '0'),
-        status: 'Testing',
-        tps: 45678.92,  // 高いTPS値
-        shard_count: 512,  // 最大シャード数
-        confirmed_transactions: 987654  // 多数のトランザクション
-      };
-      
-      res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify(testData));
-      return;
-    }
-    
-    if (req.url === '/test-transactions' && req.method === 'POST') {
-      let body = '';
-      req.on('data', chunk => {
-        body += chunk.toString();
-      });
-      
-      req.on('end', () => {
-        try {
-          const data = JSON.parse(body);
-          
-          // 実際のトランザクション処理をシミュレート
-          // 実際のノードでは、ここでトランザクションの検証と処理が行われる
-          const txId = 'test-tx-' + Date.now().toString(16) + '-' + Math.floor(Math.random() * 1000000).toString(16);
-          
-          // 処理時間をシミュレート
-          setTimeout(() => {
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({
-              id: txId,
-              status: 'success',
-              timestamp: Date.now(),
-              shard: Math.floor(Math.random() * 512),
-              confirmation_time: Math.random() * 0.5  // 0.5秒以内の確認時間
-            }));
-          }, 100);  // 100msの処理時間
-          
-        } catch (e) {
-          res.statusCode = 400;
-          res.end(JSON.stringify({ error: 'Invalid JSON', details: e.message }));
-        }
-      });
-      return;
-    }
-    
-    // 実ノードのエンドポイント（プロキシとして機能）
-    if (req.url === '/info') {
-      // 実際のノードに接続を試みる
-      const http = require('http');
-      
-      // ノードサーバーへのリクエスト
-      const nodeReq = http.request({
-        hostname: 'localhost',
-        port: 54868,
-        path: '/info',
-        method: 'GET',
-        timeout: 1000  // 1秒のタイムアウト
-      }, (nodeRes) => {
-        let data = '';
+    // リクエストをプロキシ
+    const proxyReq = http.request(
+      nodeUrl,
+      {
+        method: req.method,
+        headers: req.headers
+      },
+      (proxyRes) => {
+        // レスポンスヘッダーをコピー
+        res.writeHead(proxyRes.statusCode, proxyRes.headers);
         
-        nodeRes.on('data', (chunk) => {
-          data += chunk;
-        });
-        
-        nodeRes.on('end', () => {
-          try {
-            // ノードからのレスポンスをそのまま返す
-            res.setHeader('Content-Type', 'application/json');
-            res.end(data);
-          } catch (e) {
-            // JSONパースエラーなどの場合はフォールバック
-            console.error('Error parsing node response:', e);
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({
-              id: 'node-' + Math.random().toString(36).substring(2, 10),
-              status: 'Error',
-              tps: 0,
-              shard_count: 256,
-              confirmed_transactions: 0,
-              error: 'Failed to parse node response'
-            }));
-          }
-        });
-      });
-      
-      nodeReq.on('error', (e) => {
-        console.error('Error connecting to node:', e);
-        // ノード接続エラーの場合はエラーステータスを返す
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({
-          id: 'node-offline',
-          status: 'Offline',
-          tps: 0,
-          shard_count: 256,
-          confirmed_transactions: 0,
-          error: e.message
-        }));
-      });
-      
-      nodeReq.on('timeout', () => {
-        nodeReq.destroy();
-        // タイムアウトの場合もエラーステータスを返す
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({
-          id: 'node-timeout',
-          status: 'Timeout',
-          tps: 0,
-          shard_count: 256,
-          confirmed_transactions: 0,
-          error: 'Connection timeout'
-        }));
-      });
-      
-      nodeReq.end();
-      return;
+        // レスポンスボディをパイプ
+        proxyRes.pipe(res);
+      }
+    );
+    
+    // エラーハンドリング
+    proxyReq.on('error', (err) => {
+      console.error('Proxy error:', err);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Proxy error' }));
+    });
+    
+    // リクエストボディをパイプ
+    if (['POST', 'PUT'].includes(req.method)) {
+      req.pipe(proxyReq);
+    } else {
+      proxyReq.end();
     }
     
-    if (req.url === '/transactions' && req.method === 'POST') {
-      let body = '';
-      req.on('data', chunk => {
-        body += chunk.toString();
-      });
-      
-      req.on('end', () => {
-        try {
-          const data = JSON.parse(body);
-          
-          // 実際のノードに接続を試みる
-          const http = require('http');
-          
-          const nodeReq = http.request({
-            hostname: 'localhost',
-            port: 54868,
-            path: '/transactions',
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            timeout: 2000  // 2秒のタイムアウト
-          }, (nodeRes) => {
-            let responseData = '';
-            
-            nodeRes.on('data', (chunk) => {
-              responseData += chunk;
-            });
-            
-            nodeRes.on('end', () => {
-              try {
-                // ノードからのレスポンスをそのまま返す
-                res.setHeader('Content-Type', 'application/json');
-                res.end(responseData);
-              } catch (e) {
-                // JSONパースエラーなどの場合はフォールバック
-                console.error('Error parsing node response:', e);
-                res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify({
-                  id: 'error-' + Date.now(),
-                  status: 'error',
-                  error: 'Failed to parse node response'
-                }));
-              }
-            });
-          });
-          
-          nodeReq.on('error', (e) => {
-            console.error('Error connecting to node:', e);
-            // ノード接続エラーの場合はエラーステータスを返す
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({
-              id: 'error-' + Date.now(),
-              status: 'error',
-              error: e.message
-            }));
-          });
-          
-          nodeReq.on('timeout', () => {
-            nodeReq.destroy();
-            // タイムアウトの場合もエラーステータスを返す
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({
-              id: 'error-' + Date.now(),
-              status: 'error',
-              error: 'Connection timeout'
-            }));
-          });
-          
-          // リクエストボディを送信
-          nodeReq.write(JSON.stringify(data));
-          nodeReq.end();
-          
-        } catch (e) {
-          res.statusCode = 400;
-          res.end(JSON.stringify({ error: 'Invalid JSON', details: e.message }));
-        }
-      });
-      return;
-    }
+    return;
   }
   
-  // 静的ファイルの提供
-  let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url);
-  const extname = path.extname(filePath);
-  let contentType = MIME_TYPES[extname] || 'application/octet-stream';
+  // ルートパスの場合はindex.htmlを返す
+  if (filePath === '/') {
+    filePath = '/index.html';
+  }
   
-  fs.readFile(filePath, (err, content) => {
+  // ウォレット/DEXページへのリクエスト
+  if (filePath === '/wallet' || filePath === '/dex') {
+    filePath = '/wallet_dex.html';
+  }
+  
+  // ファイルパスを構築
+  const fullPath = path.join(__dirname, filePath);
+  
+  // ファイルの拡張子を取得
+  const extname = path.extname(fullPath);
+  
+  // Content-Typeを設定
+  const contentType = MIME_TYPES[extname] || 'application/octet-stream';
+  
+  // ファイルを読み込む
+  fs.readFile(fullPath, (err, content) => {
     if (err) {
       if (err.code === 'ENOENT') {
         // ファイルが見つからない場合は404を返す
-        fs.readFile(path.join(__dirname, '404.html'), (err, content) => {
-          res.writeHead(404, { 'Content-Type': 'text/html' });
-          res.end(content || '404 Not Found');
-        });
+        res.writeHead(404, { 'Content-Type': 'text/html' });
+        res.end('<h1>404 Not Found</h1>');
       } else {
         // サーバーエラーの場合は500を返す
-        res.writeHead(500);
-        res.end(`Server Error: ${err.code}`);
+        res.writeHead(500, { 'Content-Type': 'text/html' });
+        res.end(`<h1>500 Internal Server Error</h1><p>${err.code}</p>`);
       }
     } else {
       // 成功した場合はファイルを返す
@@ -324,6 +108,7 @@ function handleRequest(req, res) {
       res.end(content);
     }
   });
+}
 
 // サーバーを作成
 const server = http.createServer(handleRequest);
