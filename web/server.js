@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 57273;
+const PORT = 54867;
 
 // MIMEタイプのマッピング
 const MIME_TYPES = {
