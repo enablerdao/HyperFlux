@@ -1,0 +1,28 @@
+{
+  "name": "hyperflux",
+  "version": "0.1.0",
+  "description": "HyperFlux.io - 高速ブロックチェーンプラットフォーム",
+  "main": "cli.js",
+  "bin": {
+    "hyperflux": "./cli.js"
+  },
+  "scripts": {
+    "start": "cargo run",
+    "web": "cd web && node server.js",
+    "cli": "node cli.js",
+    "docker": "docker-compose up",
+    "docker-build": "docker-compose build",
+    "docker-stop": "docker-compose down"
+  },
+  "keywords": [
+    "blockchain",
+    "cryptocurrency",
+    "dex",
+    "wallet"
+  ],
+  "author": "HyperFlux Team",
+  "license": "MIT",
+  "dependencies": {
+    "readline": "^1.3.0"
+  }
+}

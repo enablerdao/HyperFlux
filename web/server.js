@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = 54867;
+const NODE_URL = process.env.NODE_URL || 'http://localhost:54868';
 
 // MIMEタイプのマッピング
 const MIME_TYPES = {
@@ -36,7 +37,7 @@ function handleRequest(req, res) {
   // APIリクエストをノードサーバーにプロキシ
   if (filePath.startsWith('/api/')) {
     // ノードサーバーのURLを構築
-    const nodeUrl = `http://localhost:54868${filePath}`;
+    const nodeUrl = `${NODE_URL}${filePath}`;
     
     // リクエストをプロキシ
     const proxyReq = http.request(

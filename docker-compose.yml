@@ -7,12 +7,20 @@ services:
       dockerfile: Dockerfile
     ports:
       - "54868:54867"
+    expose:
+      - "54867"
     platform: linux/amd64
     environment:
       - RUST_LOG=info
     restart: unless-stopped
     networks:
       - hyperflux-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:54867/info"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
   web:
     image: node:18-alpine
@@ -21,9 +29,14 @@ services:
       - ./web:/app
     command: sh -c "npm install --no-fund --no-audit --loglevel=error && node server.js"
     ports:
-      - "57273:54867"
+      - "54867:54867"
+    expose:
+      - "54867"
     depends_on:
-      - node
+      node:
+        condition: service_healthy
+    environment:
+      - NODE_URL=http://node:54867
     networks:
       - hyperflux-network
 

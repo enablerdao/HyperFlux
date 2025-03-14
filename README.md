@@ -96,11 +96,60 @@ git clone https://github.com/enablerdao/HyperFlux.git && cd HyperFlux && docker-
 
 これにより、以下のサービスが起動します：
 - ノードサーバー: http://localhost:54868
-- Webインターフェース: http://localhost:57273
+- Webインターフェース: http://localhost:54867
+
+### コマンドラインインターフェース (CLI)
+
+HyperFlux.ioはコマンドラインからの操作も可能です：
+
+```bash
+# CLIを起動
+npm run cli
+
+# または直接実行
+node cli.js
+```
+
+CLIで利用可能なコマンド：
+- `help` - ヘルプメッセージを表示
+- `info` - ノード情報を表示
+- `accounts` - すべてのアカウントを表示
+- `create-account NAME` - 新しいアカウントを作成
+- `balance ACCOUNT_ID` - アカウントの残高を表示
+- `transfer FROM TO AMOUNT [TOKEN_ID]` - 送金を実行
+- `pairs` - 取引ペアを表示
+- `orderbook BASE QUOTE` - オーダーブックを表示
+- `create-order ACCOUNT_ID BASE QUOTE TYPE PRICE AMOUNT` - 注文を作成
+- `exit` - CLIを終了
+
+### npm スクリプト
+
+package.jsonに定義されたスクリプトを使用して、簡単に操作できます：
+
+```bash
+# Rustノードを起動
+npm start
+
+# Webサーバーを起動
+npm run web
+
+# CLIを起動
+npm run cli
+
+# Dockerでノードとウェブサーバーを起動
+npm run docker
+
+# Dockerイメージをビルド
+npm run docker-build
+
+# Dockerコンテナを停止
+npm run docker-stop
+```
 
 ### 前提条件
 - Git
 - Docker と Docker Compose
+- Node.js (CLIを使用する場合)
 
 ## 詳細な実装ガイド
 

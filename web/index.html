@@ -146,6 +146,13 @@
             </div>
         </div>
 
+        <div id="connection-success" class="alert alert-success mt-4" style="display: none;">
+            <h4 class="alert-heading"><i class="bi bi-check-circle-fill"></i> おめでとうございます！</h4>
+            <p>HyperFlux.ioノードに正常に接続されました！これで高速なブロックチェーントランザクションの世界を体験できます。</p>
+            <hr>
+            <p class="mb-0">ウォレットを作成して送金を試したり、DEXで取引を体験してみましょう！</p>
+        </div>
+
         <div class="row mt-4">
             <div class="col-md-12">
                 <div class="card">
@@ -296,7 +303,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // 現在のデータソース
-        let currentDataSource = 'mock';
+        let currentDataSource = 'live';
         
         // APIエンドポイントの設定
         const API_ENDPOINTS = {
@@ -309,8 +316,8 @@
                 transactions: '/test-transactions'
             },
             live: {
-                info: 'http://localhost:54868/info',
-                transactions: 'http://localhost:54868/transactions'
+                info: '/api/info',
+                transactions: '/api/transactions'
             }
         };
         
@@ -379,6 +386,17 @@
                 const statusBadge = document.getElementById('node-status');
                 if (data.status === 'Running') {
                     statusBadge.className = 'badge bg-success';
+                    
+                    // 接続成功メッセージを表示
+                    document.getElementById('connection-success').style.display = 'block';
+                    
+                    // 3秒後にメッセージをスクロールして表示
+                    setTimeout(() => {
+                        document.getElementById('connection-success').scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center' 
+                        });
+                    }, 3000);
                 } else if (data.status === 'Testing') {
                     statusBadge.className = 'badge bg-warning';
                 } else {
