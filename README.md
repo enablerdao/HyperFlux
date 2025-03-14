@@ -13,35 +13,296 @@ HyperFlux.ioは高速処理、スケーラビリティ、セキュリティを�
 - **AI駆動型トランザクション管理**: 優先順位付けと予測によるスマートな処理
 - **高度なセキュリティ**: AES-256暗号化とマルチシグネチャによる堅牢な保護
 
-## フェーズ1の実装
-現在のリポジトリはフェーズ1の実装を含んでおり、以下の機能が利用可能です：
-- 基本的なノード構造とP2P通信
-- シンプルなトランザクション処理
-- Webインターフェースによるシステム監視
+## 技術アーキテクチャ
 
-## 使い方
+### 1. コンセンサスメカニズム: Proof of Flow (PoF)
+PoFは以下の3つの技術を組み合わせた革新的なコンセンサスメカニズムです：
 
-### 前提条件
-- Docker
+1. **有向非巡回グラフ (DAG)**
+   - ブロックチェーンの代わりにDAG構造を採用
+   - トランザクションは過去のトランザクションを参照し、並列処理が可能
+   - 実装: `src/transaction.rs`の`DAG`構造体
+
+2. **Proof of History (PoH)**
+   - 各トランザクションに暗号学的に検証可能なタイムスタンプを付与
+   - 時間の経過を証明し、トランザクションの順序を保証
+   - 実装: `src/transaction.rs`の`Transaction`構造体の`timestamp`フィールド
+
+3. **Proof of Stake (PoS)**
+   - バリデータがステークを保有し、トランザクションを検証
+   - 悪意のある行動に対してはステークが没収される仕組み
+   - 実装: `src/consensus.rs`の`Validator`トレイトと`SimpleValidator`構造体
+
+### 2. スケーラビリティ: 動的シャーディング
+トラフィック量に応じて自動的にシャード数を調整する仕組みを実装：
+
+1. **シャード割り当て**
+   - トランザクションIDのハッシュ値に基づいてシャードを決定
+   - 実装: `src/sharding.rs`の`ShardingManager::assign_shard`メソッド
+
+2. **動的調整**
+   - 負荷に応じてシャード数を256から最大512まで動的に調整
+   - 実装: `src/sharding.rs`の`ShardingManager::adjust_shards`メソッド
+
+3. **クロスシャード通信**
+   - 異なるシャード間でのトランザクション転送を効率的に処理
+   - 実装: `src/sharding.rs`の`CrossShardManager`構造体
+
+### 3. AI駆動型トランザクション管理
+AIを活用してトランザクションの優先順位付けと予測を行います：
+
+1. **優先順位付け**
+   - トランザクションの特性（サイズ、親数、タイムスタンプなど）に基づいて優先度を計算
+   - 実装: `src/ai.rs`の`AIPriorityManager::calculate_priority`メソッド
+
+2. **優先キュー**
+   - 優先度の高いトランザクションから処理するためのキュー管理
+   - 実装: `src/ai.rs`の`PrioritizedTransaction`構造体と`BinaryHeap`
+
+### 4. ノードアーキテクチャ
+各ノードは以下のコンポーネントで構成されています：
+
+1. **コアコンポーネント**
+   - DAG: トランザクションの保存と管理
+   - コンセンサスエンジン: トランザクションの検証と承認
+   - シャーディングマネージャ: シャードの割り当てと調整
+   - AI優先度マネージャ: トランザクションの優先順位付け
+   - 実装: `src/node.rs`の`Node`構造体
+
+2. **APIサーバー**
+   - RESTful APIによるノードとの対話
+   - トランザクションの送信と状態確認のエンドポイント
+   - 実装: `src/api.rs`の`ApiServer`構造体
+
+3. **Webインターフェース**
+   - ノードの状態とパフォーマンスの可視化
+   - トランザクションの作成と監視
+   - 実装: `web/index.html`と`web/server.js`
+
+## 実装ガイド
+
+### 環境構築
+
+#### 前提条件
+- Rust (1.75以上)
 - Node.js (v14以上)
-- Rust (最新版)
+- Docker と Docker Compose
 
-### ノードの起動
+#### Rustのインストール
 ```bash
-cd HyperFlux.io
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source "$HOME/.cargo/env"
+```
+
+#### Node.jsのインストール
+```bash
+# Ubuntuの場合
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# macOSの場合
+brew install node
+```
+
+### プロジェクトのクローンと構築
+
+```bash
+# リポジトリのクローン
+git clone https://github.com/enablerdao/HyperFlux.git
+cd HyperFlux
+
+# Rustの依存関係をインストール
+cargo build
+
+# Webサーバーの依存関係をインストール
+cd web
+npm install
+cd ..
+```
+
+### 開発モードでの実行
+
+```bash
+# 開発モードでノードとWebサーバーを起動
+./run_dev.sh
+```
+
+### Dockerでの実行
+
+```bash
+# Dockerイメージをビルドして起動
+docker-compose up --build
+```
+
+### 主要コンポーネントの実装詳細
+
+#### 1. トランザクション処理
+トランザクション処理の流れは以下の通りです：
+
+1. クライアントがAPIを通じてトランザクションを送信
+2. AIがトランザクションの優先度を計算し、優先キューに追加
+3. シャーディングマネージャがトランザクションの所属シャードを決定
+4. 所属シャードがローカルの場合、コンセンサスエンジンが処理
+5. バリデータがトランザクションを検証し、過半数の承認で確定
+6. DAGにトランザクションが追加され、状態が「確認済み」に更新
+
+実装例（トランザクション送信）:
+```rust
+// トランザクションの作成
+let tx = Transaction::new(
+    vec!["parent1", "parent2"], // 親トランザクションID
+    payload.as_bytes().to_vec(), // ペイロード
+    signature.as_bytes().to_vec(), // 署名
+);
+
+// ノードにトランザクションを送信
+node.submit_transaction(tx).await?;
+```
+
+#### 2. シャーディングの実装
+シャーディングの実装は以下の通りです：
+
+1. トランザクションIDのハッシュ値を計算
+2. ハッシュ値を現在のシャード数で割った余りがシャードID
+3. 負荷に応じてシャード数を動的に調整（256〜512）
+4. 異なるシャードへのトランザクション転送はメッセージキューを使用
+
+実装例（シャード割り当て）:
+```rust
+// トランザクションのシャードを決定
+let shard_id = sharding_manager.assign_shard(&tx);
+
+// 別のシャードに転送が必要な場合
+if shard_id != current_shard_id {
+    cross_shard_manager.send_cross_shard(tx, shard_id).await?;
+}
+```
+
+#### 3. AIによる優先順位付け
+AIによる優先順位付けの実装は以下の通りです：
+
+1. トランザクションの特性（サイズ、親数、タイムスタンプ）を分析
+2. 特性に基づいて優先スコアを計算
+3. 優先スコアに基づいてバイナリヒープでトランザクションを管理
+4. 優先度の高いトランザクションから順に処理
+
+実装例（優先度計算）:
+```rust
+// トランザクションの優先度を計算
+let size_score = 1000 - tx.payload.len().min(1000) as u32;
+let parent_score = tx.parent_ids.len() as u32 * 100;
+let time_score = (current_time - tx.timestamp).min(1000) as u32;
+
+// 総合スコアを計算
+let priority = size_score + parent_score + time_score;
+```
+
+### テスト方法
+
+#### 単体テスト
+```bash
+# すべてのテストを実行
+cargo test
+
+# 特定のモジュールのテストを実行
+cargo test --package hyperflux --lib transaction
+```
+
+#### 性能テスト
+```bash
+# TPSベンチマークを実行
+cargo bench --bench tps_benchmark
+```
+
+#### 負荷テスト
+```bash
+# 100ノードでの負荷テスト（Dockerが必要）
+./scripts/load_test.sh 100
+```
+
+## デプロイガイド
+
+### ローカル環境へのデプロイ
+```bash
+# 開発モードで実行
+./run_dev.sh
+
+# または、Dockerで実行
 docker-compose up
 ```
 
-### Webインターフェースへのアクセス
-ブラウザで以下のURLにアクセスしてください：
-```
-http://localhost:54867
+### 本番環境へのデプロイ
+```bash
+# 本番用の設定ファイルを使用
+cp config/production.toml config/config.toml
+
+# Dockerで本番モードで実行
+docker-compose -f docker-compose.prod.yml up -d
 ```
 
+### Webインターフェースのデプロイ
+Webインターフェースは以下の方法でデプロイできます：
+
+1. **Netlify**
+   - GitHubリポジトリと連携
+   - ビルドディレクトリを`web`に設定
+   - 自動デプロイの設定
+
+2. **Vercel**
+   - GitHubリポジトリと連携
+   - ルートディレクトリを`web`に設定
+   - 自動デプロイの設定
+
+3. **AWS S3 + CloudFront**
+   - S3バケットにwebディレクトリの内容をアップロード
+   - CloudFrontでCDN配信を設定
+
 ## 開発ロードマップ
-- **フェーズ1**: 基本機能の実装とテスト (現在)
-- **フェーズ2**: スケーラビリティの向上と100,000 TPSの達成
-- **フェーズ3**: 本番環境へのデプロイとエコシステムの拡大
+
+### フェーズ1（現在）
+- 基本的なノード構造とP2P通信
+- シンプルなトランザクション処理
+- Webインターフェースによるシステム監視
+- 目標: 50,000 TPS
+
+### フェーズ2
+- スケーラビリティの向上
+- AIモデルの高度化
+- セキュリティの強化
+- 目標: 100,000 TPS
+
+### フェーズ3
+- 本番環境へのデプロイ
+- エコシステムの拡大
+- サードパーティ開発者向けSDKの提供
+- 目標: グローバル規模での採用
+
+## トラブルシューティング
+
+### よくある問題と解決策
+
+1. **ノードが起動しない**
+   - ログを確認: `RUST_LOG=debug cargo run`
+   - ポートの競合を確認: `lsof -i :54867`
+   - 依存関係を更新: `cargo update`
+
+2. **トランザクションが処理されない**
+   - バリデータの状態を確認
+   - ネットワーク接続を確認
+   - シャーディング設定を確認
+
+3. **パフォーマンスが低い**
+   - システムリソースを確認
+   - ログレベルを下げる: `RUST_LOG=info`
+   - シャード数を増やす: 設定ファイルで`initial_shards`を調整
+
+## コントリビューションガイド
+
+1. このリポジトリをフォーク
+2. 機能ブランチを作成: `git checkout -b feature/amazing-feature`
+3. 変更をコミット: `git commit -m 'Add amazing feature'`
+4. ブランチをプッシュ: `git push origin feature/amazing-feature`
+5. プルリクエストを作成
 
 ## ライセンス
 MIT
