@@ -192,7 +192,7 @@ cd HyperFlux
 - 🖥️ **Webインターフェース**: [http://localhost:54867](http://localhost:54867)
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/dashboard.png" alt="HyperFlux.io Dashboard" width="80%"/>
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/dashboard.svg" alt="HyperFlux.io Dashboard" width="80%"/>
 </div>
 
 ### 💻 コマンドラインインターフェース (CLI)
