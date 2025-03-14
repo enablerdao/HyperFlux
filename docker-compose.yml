@@ -7,6 +7,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "54868:54867"
+    platform: linux/amd64
     environment:
       - RUST_LOG=info
     restart: unless-stopped

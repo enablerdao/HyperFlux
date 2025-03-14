@@ -15,7 +15,12 @@ RUN mkdir -p src && \
 # Copy the actual source code
 COPY src ./src
 
-# Build the application
+# Build the application with cross-platform support
+RUN rustup target add aarch64-unknown-linux-gnu x86_64-unknown-linux-gnu
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc-aarch64-linux-gnu libc6-dev-arm64-cross
+
+# Build for the current architecture
 RUN cargo build --release
 
 # Create the runtime image
@@ -32,6 +37,9 @@ RUN apt-get update && \
 
 # Copy the binary from the builder
 COPY --from=builder /app/target/release/hyperflux /app/hyperflux
+
+# Make sure the binary is executable
+RUN chmod +x /app/hyperflux
 
 # Expose the API port
 EXPOSE 54867
