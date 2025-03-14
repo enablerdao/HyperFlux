@@ -1,7 +1,7 @@
 # HyperFlux.io
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/logo.png" alt="HyperFlux.io Logo" width="300"/>
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/logo.svg" alt="HyperFlux.io Logo" width="300"/>
   <h3>次世代高速ブロックチェーンプラットフォーム</h3>
   
   [![GitHub Stars](https://img.shields.io/github/stars/enablerdao/HyperFlux?style=social)](https://github.com/enablerdao/HyperFlux/stargazers)
@@ -148,7 +148,7 @@ cd HyperFlux
 - 🖥️ **Webインターフェース**: [http://localhost:54867](http://localhost:54867)
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/dashboard.svg" alt="HyperFlux.io Dashboard" width="80%"/>
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/dashboard.png" alt="HyperFlux.io Dashboard" width="80%"/>
 </div>
 
 ### 💻 コマンドラインインターフェース (CLI)
@@ -156,7 +156,7 @@ cd HyperFlux
 HyperFlux.ioはコマンドラインからの操作も可能です：
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/cli.svg" alt="HyperFlux.io CLI" width="80%"/>
+  <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/cli.png" alt="HyperFlux.io CLI" width="80%"/>
 </div>
 
 ```bash
@@ -270,7 +270,7 @@ package.jsonに定義されたスクリプトを使用して、簡単に操作�
     </tr>
     <tr>
       <td>
-        <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/linux.svg" width="20" alt="Linux" />
+        <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/linux.png" width="20" alt="Linux" />
         Linux
       </td>
       <td>x86_64, ARM64</td>
@@ -278,7 +278,7 @@ package.jsonに定義されたスクリプトを使用して、簡単に操作�
     </tr>
     <tr>
       <td>
-        <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/macos.svg" width="20" alt="macOS" />
+        <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/macos.png" width="20" alt="macOS" />
         macOS
       </td>
       <td>Intel Chip, Apple Silicon (M1/M2/M3)</td>
@@ -286,7 +286,7 @@ package.jsonに定義されたスクリプトを使用して、簡単に操作�
     </tr>
     <tr>
       <td>
-        <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/docs/images/windows.svg" width="20" alt="Windows" />
+        <img src="https://raw.githubusercontent.com/enablerdao/HyperFlux/main/web/assets/windows.png" width="20" alt="Windows" />
         Windows
       </td>
       <td>x86_64 (WSL2経由)</td>
