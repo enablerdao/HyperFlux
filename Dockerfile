@@ -41,15 +41,16 @@ COPY --from=builder /app/target/release/hyperflux /app/hyperflux
 RUN chmod +x /app/hyperflux
 
 # APIポートを公開
-EXPOSE 54867
+EXPOSE ${PORT:-54867}
 
 # ヘルスチェック設定
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:54867/info || exit 1
+    CMD curl -f http://localhost:${PORT:-54867}/info || exit 1
 
 # 環境変数の設定
 ENV RUST_LOG=info
 ENV DATA_DIR=/app/data
+ENV PORT=10000
 
 # アプリケーションを実行
 CMD ["/app/hyperflux"]

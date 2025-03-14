@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 54867;
+const PORT = process.env.PORT || 54867;
 const NODE_URL = process.env.NODE_URL || 'http://localhost:54868';
 
 // MIMEタイプのマッピング

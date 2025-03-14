@@ -10,6 +10,8 @@ services:
     envVars:
       - key: RUST_LOG
         value: info
+      - key: PORT
+        value: 10000
     autoDeploy: true
 
   # HyperFlux Webインターフェース
