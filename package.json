@@ -12,7 +12,8 @@
     "cli": "node cli.js",
     "docker": "docker-compose up",
     "docker-build": "docker-compose build",
-    "docker-stop": "docker-compose down"
+    "docker-stop": "docker-compose down",
+    "all": "./start.sh"
   },
   "keywords": [
     "blockchain",

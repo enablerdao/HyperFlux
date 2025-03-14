@@ -127,6 +127,9 @@ CLIで利用可能なコマンド：
 package.jsonに定義されたスクリプトを使用して、簡単に操作できます：
 
 ```bash
+# すべてのサービスを1つのターミナルで起動（ノード、Web、CLI）
+npm run all
+
 # Rustノードを起動
 npm start
 
@@ -144,6 +147,13 @@ npm run docker-build
 
 # Dockerコンテナを停止
 npm run docker-stop
+```
+
+### 直接スクリプトを実行
+
+```bash
+# すべてのサービスを1つのターミナルで起動
+./start.sh
 ```
 
 ### 前提条件
