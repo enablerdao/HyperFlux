@@ -88,7 +88,27 @@ impl ApiServer {
         let node_info = warp::path("info")
             .and(warp::get())
             .and(with_node(Arc::clone(&node_clone)))
-            .and_then(handle_node_info);
+            .and(with_wallet_manager(Arc::clone(&wallet_manager_clone)))
+            .and_then(|node: Arc<Mutex<Node>>, wallet_manager: Arc<WalletManager>| async move {
+                let node = node.lock().await;
+                
+                // デモアカウントのIDを取得
+                let accounts = wallet_manager.get_all_accounts();
+                let alice_id = accounts.iter().find(|a| a.name == "Alice").map(|a| a.id.clone());
+                let bob_id = accounts.iter().find(|a| a.name == "Bob").map(|a| a.id.clone());
+                
+                let response = serde_json::json!({
+                    "id": node.id.clone(),
+                    "status": format!("{:?}", node.get_status()),
+                    "tps": node.get_tps(),
+                    "shard_count": node.get_shard_count(),
+                    "confirmed_transactions": node.dag.confirmed_count(),
+                    "alice_id": alice_id,
+                    "bob_id": bob_id
+                });
+                
+                Ok::<_, Rejection>(warp::reply::json(&response))
+            });
         
         // トランザクションを作成するエンドポイント
         let create_tx = warp::path("transactions")
@@ -104,6 +124,15 @@ impl ApiServer {
             .and(warp::body::json())
             .and(with_wallet_manager(Arc::clone(&wallet_manager_clone)))
             .and_then(handle_create_account);
+        
+        // アカウント一覧取得エンドポイント
+        let get_accounts = warp::path("accounts")
+            .and(warp::get())
+            .and(with_wallet_manager(Arc::clone(&wallet_manager_clone)))
+            .and_then(|wallet_manager: Arc<WalletManager>| async move {
+                let accounts = wallet_manager.get_all_accounts();
+                Ok::<_, Rejection>(warp::reply::json(&accounts))
+            });
         
         // アカウント情報取得エンドポイント
         let get_account = warp::path!("accounts" / String)
@@ -165,6 +194,7 @@ impl ApiServer {
         let routes = node_info
             .or(create_tx)
             .or(create_account)
+            .or(get_accounts)
             .or(get_account)
             .or(transfer)
             .or(add_trading_pair)

@@ -88,6 +88,33 @@ impl WalletManager {
         Ok(account)
     }
     
+    /// アカウントの残高を更新
+    pub fn update_account_balance(&self, account_id: &str, amount: f64) -> Result<(), String> {
+        let mut accounts = self.accounts.lock().unwrap();
+        
+        let account = accounts.get_mut(account_id)
+            .ok_or_else(|| format!("Account {} not found", account_id))?;
+        
+        account.balance += amount;
+        
+        info!("Updated balance for account {}: {}", account_id, account.balance);
+        Ok(())
+    }
+    
+    /// アカウントのトークン残高を更新
+    pub fn update_account_token_balance(&self, account_id: &str, token_id: &str, amount: f64) -> Result<(), String> {
+        let mut accounts = self.accounts.lock().unwrap();
+        
+        let account = accounts.get_mut(account_id)
+            .ok_or_else(|| format!("Account {} not found", account_id))?;
+        
+        let balance = account.token_balances.entry(token_id.to_string()).or_insert(0.0);
+        *balance += amount;
+        
+        info!("Updated token balance for account {}, token {}: {}", account_id, token_id, balance);
+        Ok(())
+    }
+    
     /// アカウントを取得
     pub fn get_account(&self, account_id: &str) -> Option<Account> {
         let accounts = self.accounts.lock().unwrap();
@@ -292,17 +319,17 @@ impl WalletManager {
 
 /// トランザクションデータ
 #[derive(Debug, Serialize, Deserialize)]
-struct TransactionData {
+pub struct TransactionData {
     /// 送信元アカウントID
-    from: String,
+    pub from: String,
     /// 送信先アカウントID
-    to: String,
+    pub to: String,
     /// 金額
-    amount: f64,
+    pub amount: f64,
     /// トークンID（Noneの場合はネイティブトークン）
-    token_id: Option<String>,
+    pub token_id: Option<String>,
     /// タイムスタンプ
-    timestamp: i64,
+    pub timestamp: i64,
 }
 
 /// 秘密鍵を生成（実際の実装では暗号学的に安全な方法を使用）

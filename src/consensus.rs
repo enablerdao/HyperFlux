@@ -57,6 +57,13 @@ impl ProofOfFlow {
             // トランザクションを確認済みに更新
             self.dag.update_transaction_status(&tx.id, TransactionStatus::Confirmed)?;
             
+            // トランザクションデータをデシリアライズしてウォレットに適用
+            let tx_data: crate::wallet::TransactionData = serde_json::from_slice(&tx.payload)
+                .map_err(|e| format!("Failed to deserialize transaction data: {}", e))?;
+            
+            // ウォレットマネージャーからトランザクションを処理
+            // 注: 実際の実装では、ウォレットマネージャーへの参照を保持する必要があります
+            
             info!("Transaction {} confirmed with {}/{} votes", tx.id, valid_votes, self.validators.len());
             Ok(())
         } else {

@@ -64,6 +64,15 @@ async fn initialize_demo_data(wallet_manager: &WalletManager, dex_manager: &DexM
     let alice = wallet_manager.create_account("Alice".to_string()).unwrap();
     let bob = wallet_manager.create_account("Bob".to_string()).unwrap();
     
+    // デモアカウントに初期残高を追加
+    wallet_manager.update_account_balance(&alice.id, 10000.0).unwrap();
+    wallet_manager.update_account_token_balance(&alice.id, "BTC", 1000.0).unwrap();
+    wallet_manager.update_account_token_balance(&alice.id, "ETH", 5000.0).unwrap();
+    
+    wallet_manager.update_account_balance(&bob.id, 10000.0).unwrap();
+    wallet_manager.update_account_token_balance(&bob.id, "BTC", 500.0).unwrap();
+    wallet_manager.update_account_token_balance(&bob.id, "ETH", 2500.0).unwrap();
+    
     info!("Created demo accounts: Alice ({}), Bob ({})", alice.id, bob.id);
     
     // 取引ペアを追加

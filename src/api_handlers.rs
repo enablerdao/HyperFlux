@@ -263,7 +263,7 @@ pub async fn handle_transfer(
         &req.from_account_id,
         &req.to_account_id,
         req.amount,
-        req.token_id,
+        req.token_id.clone(),
         vec![],
     ) {
         Ok(tx) => {
@@ -271,6 +271,12 @@ pub async fn handle_transfer(
             let mut node = node.lock().await;
             match node.submit_transaction(tx.clone()).await {
                 Ok(_) => {
+                    // トランザクションが成功したら、直接残高を更新
+                    // 実際の実装では、コンセンサスエンジンがトランザクションを処理した後に残高を更新するべき
+                    if let Err(e) = wallet_manager.process_transaction(&tx) {
+                        error!("Failed to process transaction: {}", e);
+                    }
+                    
                     let response = TransferResponse {
                         transaction_id: tx.id,
                         status: "success".to_string(),
